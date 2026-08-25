@@ -23,7 +23,7 @@ export default function About() {
     />
 
     <img
-      src="/images/dunia2.jpg"
+      src="/images/dunia2.JPG"
       alt="Dunia Arkoub"
       className="h-[280px] w-full rounded-2xl object-cover shadow-2xl"
     />
