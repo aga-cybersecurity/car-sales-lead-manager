@@ -6,27 +6,32 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative h-[100svh] w-full overflow-hidden bg-black"
+      className="relative min-h-[100svh] w-full overflow-hidden bg-black"
     >
       {/* Background Video */}
       <video
-        src="/videos/Hero.mp4"
         autoPlay
         muted
         loop
         playsInline
-        preload="metadata"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
+        preload="auto"
+        poster="/images/dunia1.jpeg"
+        className="absolute inset-0 z-0 h-full w-full object-cover object-[center_40%]"
+      >
+        <source
+          src="/videos/Hero-mobile.mp4"
+          type="video/mp4"
+        />
+      </video>
 
-      {/* Dark Luxury Overlay */}
-      <div className="absolute inset-0 bg-black/35" />
+      {/* Luxury Overlay */}
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-black/85 via-black/55 to-black/35" />
 
-      {/* Bottom Fade */}
-      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black via-black/40 to-transparent" />
+      {/* Bottom Blend */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-48 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
       {/* Hero Content */}
-      <div className="relative z-10 flex h-full items-center justify-center px-6 pt-20 text-center">
+      <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-6 pt-20 text-center">
         <div className="max-w-4xl">
 
           <motion.p
