@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -15,30 +16,53 @@ export default function Hero() {
     video.defaultMuted = true;
     video.playsInline = true;
 
-    const startVideo = () => {
-      video.play().catch(() => {
-        // Safari may reject autoplay, especially with
-        // Low Power Mode enabled.
-      });
-    };
+    const tryPlayVideo = async () => {
+      try {
+        await video.play();
 
-    // Initial attempt
-    startVideo();
-
-    // Try again when video becomes available
-    video.addEventListener("loadeddata", startVideo);
-    video.addEventListener("canplay", startVideo);
-
-    // Try again when Safari brings the page back
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        startVideo();
+        // Video successfully started
+        setVideoPlaying(true);
+      } catch {
+        // Safari blocked autoplay.
+        // Keep the poster image visible.
+        setVideoPlaying(false);
       }
     };
 
-    // Try again when Safari restores the page
+    // Try immediately
+    tryPlayVideo();
+
+    // Try again when enough video data has loaded
+    const handleLoadedData = () => {
+      tryPlayVideo();
+    };
+
+    const handleCanPlay = () => {
+      tryPlayVideo();
+    };
+
+    // If Safari pauses/rejects the video,
+    // keep the poster visible.
+    const handlePause = () => {
+      if (video.currentTime === 0) {
+        setVideoPlaying(false);
+      }
+    };
+
+    video.addEventListener("loadeddata", handleLoadedData);
+    video.addEventListener("canplay", handleCanPlay);
+    video.addEventListener("pause", handlePause);
+
+    // Retry when the page becomes visible again
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        tryPlayVideo();
+      }
+    };
+
+    // Retry when Safari restores the page
     const handlePageShow = () => {
-      startVideo();
+      tryPlayVideo();
     };
 
     document.addEventListener(
@@ -49,15 +73,30 @@ export default function Hero() {
     window.addEventListener("pageshow", handlePageShow);
 
     return () => {
-      video.removeEventListener("loadeddata", startVideo);
-      video.removeEventListener("canplay", startVideo);
+      video.removeEventListener(
+        "loadeddata",
+        handleLoadedData
+      );
+
+      video.removeEventListener(
+        "canplay",
+        handleCanPlay
+      );
+
+      video.removeEventListener(
+        "pause",
+        handlePause
+      );
 
       document.removeEventListener(
         "visibilitychange",
         handleVisibilityChange
       );
 
-      window.removeEventListener("pageshow", handlePageShow);
+      window.removeEventListener(
+        "pageshow",
+        handlePageShow
+      );
     };
   }, []);
 
@@ -66,7 +105,20 @@ export default function Hero() {
       id="home"
       className="relative min-h-[100svh] w-full overflow-hidden bg-black"
     >
-      {/* Mobile Hero Video */}
+
+      {/* Poster / Fallback Image */}
+      <img
+        src="/images/dunia1.jpeg"
+        alt=""
+        aria-hidden="true"
+        className={`absolute inset-0 z-0 h-full w-full object-cover object-[center_40%] transition-opacity duration-700 ${
+          videoPlaying
+            ? "opacity-0"
+            : "opacity-100"
+        }`}
+      />
+
+      {/* Background Video */}
       <video
         ref={videoRef}
         autoPlay
@@ -75,7 +127,12 @@ export default function Hero() {
         playsInline
         preload="auto"
         poster="/images/dunia1.jpeg"
-        className="absolute inset-0 z-0 h-full w-full object-cover object-[center_40%]"
+        aria-hidden="true"
+        className={`absolute inset-0 z-0 h-full w-full object-cover object-[center_40%] transition-opacity duration-700 ${
+          videoPlaying
+            ? "opacity-100"
+            : "opacity-0"
+        }`}
       >
         <source
           src="/videos/Hero-mobile-optimized.mp4"
@@ -93,6 +150,7 @@ export default function Hero() {
       <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-6 pt-20 text-center">
         <div className="max-w-4xl">
 
+          {/* Eyebrow */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -102,6 +160,7 @@ export default function Hero() {
             Luxury Vehicle Consultant
           </motion.p>
 
+          {/* Heading */}
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -115,10 +174,14 @@ export default function Hero() {
             Perfect Vehicle
           </motion.h1>
 
+          {/* Description */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 1 }}
+            transition={{
+              delay: 0.5,
+              duration: 1,
+            }}
             className="mx-auto mt-7 max-w-2xl text-base leading-relaxed text-gray-300 md:text-lg"
           >
             Personalized guidance for purchasing, leasing,
@@ -126,12 +189,23 @@ export default function Hero() {
             with Dunia Arkoub.
           </motion.p>
 
+          {/* Buttons */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.8 }}
+            initial={{
+              opacity: 0,
+              y: 20,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              delay: 0.8,
+              duration: 0.8,
+            }}
             className="mt-9 flex flex-wrap justify-center gap-4"
           >
+
             <a
               href="#consultation"
               className="rounded-full bg-yellow-600 px-8 py-4 font-semibold text-black transition hover:bg-yellow-500"
@@ -147,6 +221,7 @@ export default function Hero() {
             >
               Browse Inventory
             </a>
+
           </motion.div>
 
         </div>
