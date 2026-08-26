@@ -59,89 +59,95 @@ export default function Consultation() {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
+    async function handleSubmit(e) {
+  e.preventDefault();
 
-    if (
-      !formData.first_name ||
-      !formData.last_name ||
-      !formData.phone
-    ) {
-      alert("Please fill in First Name, Last Name, and Phone Number.");
-      return;
-    }
+  if (
+    !formData.first_name ||
+    !formData.last_name ||
+    !formData.phone
+  ) {
+    alert("Please fill in First Name, Last Name, and Phone Number.");
+    return;
+  }
 
-    if (
-      formData.email &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
-    ) {
-      alert("Please enter a valid email address.");
-      return;
-    }
+  if (
+    formData.email &&
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+  ) {
+    alert("Please enter a valid email address.");
+    return;
+  }
 
-    setSubmitting(true);
-console.log("TRADE IN:", tradeIn);
-console.log("TRADE MILES RAW:", formData.trade_miles);
-console.log(
-  "TRADE MILES NUMBER:",
-  formData.trade_miles
-    ? Number(formData.trade_miles.replace(/,/g, ""))
-    : null
-);
-    const { error } = await supabase.from("Leads").insert([
-      {
-        ...formData,
+  setSubmitting(true);
 
-        payment_method: payment,
-        trade_in: tradeIn,
+  // Convert formatted mileage like "45,000" into 45000
+  const mileage =
+    formData.trade_miles &&
+    formData.trade_miles.toString().replace(/,/g, "").trim() !== ""
+      ? Number(
+          formData.trade_miles.toString().replace(/,/g, "").trim()
+        )
+      : null;
 
-        budget_min: formData.budget_min
-          ? Number(formData.budget_min.replace(/\D/g, ""))
-          : null,
+  console.log("TRADE IN:", tradeIn);
+  console.log("TRADE MILES RAW:", formData.trade_miles);
+  console.log("TRADE MILES TO SAVE:", mileage);
 
-        budget_max: formData.budget_max
-          ? Number(formData.budget_max.replace(/\D/g, ""))
-          : null,
+  const leadData = {
+    ...formData,
 
-        trade_miles: formData.trade_miles
-  ? Number(formData.trade_miles.replace(/,/g, ""))
-  : null,
-      },
-    ]);
+    payment_method: payment || null,
+    trade_in: tradeIn || null,
 
-    if (error) {
-      console.log("SUPABASE ERROR:", error.message);
-      alert(error.message);
-    } else {
-      alert("Your consultation request has been submitted!");
+    budget_min: formData.budget_min
+      ? Number(formData.budget_min.replace(/\D/g, ""))
+      : null,
 
-      setFormData({
-        first_name: "",
-        last_name: "",
-        phone: "",
-        email: "",
+    budget_max: formData.budget_max
+      ? Number(formData.budget_max.replace(/\D/g, ""))
+      : null,
 
-        make_model: "",
-        year: "",
-        trim: "",
-        stock_number: "",
-        factory_order: "",
+    trade_miles: mileage,
+  };
 
-        trade_year: "",
-        trade_model: "",
-        trade_miles: "",
-        trade_vin: "",
+  console.log("FINAL LEAD DATA:", leadData);
 
-        budget_min: "",
-        budget_max: "",
+  const { error } = await supabase
+    .from("Leads")
+    .insert([leadData]);
 
-        notes: "",
-      });
+  if (error) {
+    console.error("SUPABASE ERROR:", error);
+    alert(error.message);
+  } else {
+    alert("Your consultation request has been submitted!");
 
-      setPayment("");
-      setTradeIn("");
-    }
+    setFormData({
+      first_name: "",
+      last_name: "",
+      phone: "",
+      email: "",
+      make_model: "",
+      year: "",
+      trim: "",
+      stock_number: "",
+      factory_order: "",
+      trade_year: "",
+      trade_model: "",
+      trade_miles: "",
+      trade_vin: "",
+      budget_min: "",
+      budget_max: "",
+      notes: "",
+    });
 
-    setSubmitting(false);
+    setPayment("");
+    setTradeIn("");
+  }
+
+  setSubmitting(false);
+}
   }
 
   return (
