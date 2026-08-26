@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 export default function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoPlaying, setVideoPlaying] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -16,138 +16,69 @@ export default function Hero() {
     video.defaultMuted = true;
     video.playsInline = true;
 
-    const tryPlayVideo = async () => {
+    const playVideo = async () => {
       try {
         await video.play();
-        setVideoPlaying(true);
+        setVideoFailed(false);
       } catch {
-        setVideoPlaying(false);
+        console.log("Autoplay blocked by browser.");
       }
     };
 
-    tryPlayVideo();
-
-    const handleLoadedData = () => {
-      tryPlayVideo();
-    };
+    playVideo();
 
     const handleCanPlay = () => {
-      tryPlayVideo();
+      playVideo();
     };
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        tryPlayVideo();
-      }
+    const handleError = () => {
+      setVideoFailed(true);
     };
 
-    const handlePageShow = () => {
-      tryPlayVideo();
-    };
-
-    video.addEventListener("loadeddata", handleLoadedData);
     video.addEventListener("canplay", handleCanPlay);
-
-    document.addEventListener(
-      "visibilitychange",
-      handleVisibilityChange
-    );
-
-    window.addEventListener("pageshow", handlePageShow);
+    video.addEventListener("error", handleError);
 
     return () => {
-      video.removeEventListener(
-        "loadeddata",
-        handleLoadedData
-      );
-
-      video.removeEventListener(
-        "canplay",
-        handleCanPlay
-      );
-
-      document.removeEventListener(
-        "visibilitychange",
-        handleVisibilityChange
-      );
-
-      window.removeEventListener(
-        "pageshow",
-        handlePageShow
-      );
+      video.removeEventListener("canplay", handleCanPlay);
+      video.removeEventListener("error", handleError);
     };
   }, []);
-
-  // TikTok-friendly user interaction
-  const handleHeroTap = async (
-    e: React.MouseEvent<HTMLDivElement>
-  ) => {
-    // Don't interfere with buttons or links
-    const target = e.target as HTMLElement;
-
-    if (
-      target.closest("a") ||
-      target.closest("button")
-    ) {
-      return;
-    }
-
-    const video = videoRef.current;
-
-    if (!video) return;
-
-    try {
-      video.muted = true;
-      video.playsInline = true;
-
-      await video.play();
-
-      setVideoPlaying(true);
-    } catch (error) {
-      console.log("Video could not start:", error);
-    }
-  };
 
   return (
     <section
       id="home"
-      onClick={handleHeroTap}
       className="relative min-h-[100svh] w-full overflow-hidden bg-black"
     >
 
-      {/* Poster / Fallback Image */}
-      <img
-        src="/images/dunia1.jpeg"
-        alt=""
-        aria-hidden="true"
-        className={`absolute inset-0 z-0 h-full w-full object-cover object-[center_40%] transition-opacity duration-700 ${
-          videoPlaying
-            ? "pointer-events-none opacity-0"
-            : "opacity-100"
-        }`}
-      />
-
       {/* Background Video */}
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        poster="/images/dunia1.jpeg"
-        aria-hidden="true"
-        className={`absolute inset-0 z-0 h-full w-full object-cover object-[center_40%] transition-opacity duration-700 ${
-          videoPlaying
-            ? "opacity-100"
-            : "opacity-0"
-        }`}
-      >
-        <source
-          src="/videos/Hero-mobile-optimized.mp4"
-          type="video/mp4"
+      {!videoFailed && (
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/images/dunia1.jpeg"
+          aria-hidden="true"
+          className="absolute inset-0 z-0 h-full w-full object-cover object-[center_40%]"
+        >
+          <source
+            src="/videos/Hero-mobile-optimized.mp4"
+            type="video/mp4"
+          />
+        </video>
+      )}
+
+      {/* Fallback Image */}
+      {videoFailed && (
+        <img
+          src="/images/dunia1.jpeg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 z-0 h-full w-full object-cover object-[center_40%]"
         />
-      </video>
+      )}
 
       {/* Luxury Overlay */}
       <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-black/85 via-black/55 to-black/35" />
@@ -214,7 +145,6 @@ export default function Hero() {
             }}
             className="mt-9 flex flex-wrap justify-center gap-4"
           >
-
             <a
               href="#consultation"
               className="rounded-full bg-yellow-600 px-8 py-4 font-semibold text-black transition hover:bg-yellow-500"
@@ -230,7 +160,6 @@ export default function Hero() {
             >
               Browse Inventory
             </a>
-
           </motion.div>
 
         </div>
