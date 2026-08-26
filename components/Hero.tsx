@@ -18,21 +18,15 @@ export default function Hero() {
 
     const tryPlayVideo = async () => {
       try {
-        video.muted = true;
-        video.playsInline = true;
-
         await video.play();
-
         setVideoPlaying(true);
       } catch {
         setVideoPlaying(false);
       }
     };
 
-    // Initial attempt
     tryPlayVideo();
 
-    // Try again once video data is available
     const handleLoadedData = () => {
       tryPlayVideo();
     };
@@ -41,42 +35,18 @@ export default function Hero() {
       tryPlayVideo();
     };
 
-    // Try again when video is loaded
-    const handleLoadedMetadata = () => {
-      tryPlayVideo();
-    };
-
-    // If the video gets paused, try again
-    const handlePause = () => {
-      if (!document.hidden) {
-        setTimeout(() => {
-          tryPlayVideo();
-        }, 300);
-      }
-    };
-
-    // TikTok / Safari may restore the page after opening it
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        setTimeout(() => {
-          tryPlayVideo();
-        }, 200);
+        tryPlayVideo();
       }
     };
 
     const handlePageShow = () => {
-      setTimeout(() => {
-        tryPlayVideo();
-      }, 200);
+      tryPlayVideo();
     };
 
-    // Try again when the browser finishes loading
-    window.addEventListener("load", tryPlayVideo);
-
     video.addEventListener("loadeddata", handleLoadedData);
-    video.addEventListener("loadedmetadata", handleLoadedMetadata);
     video.addEventListener("canplay", handleCanPlay);
-    video.addEventListener("pause", handlePause);
 
     document.addEventListener(
       "visibilitychange",
@@ -86,26 +56,14 @@ export default function Hero() {
     window.addEventListener("pageshow", handlePageShow);
 
     return () => {
-      window.removeEventListener("load", tryPlayVideo);
-
       video.removeEventListener(
         "loadeddata",
         handleLoadedData
       );
 
       video.removeEventListener(
-        "loadedmetadata",
-        handleLoadedMetadata
-      );
-
-      video.removeEventListener(
         "canplay",
         handleCanPlay
-      );
-
-      video.removeEventListener(
-        "pause",
-        handlePause
       );
 
       document.removeEventListener(
@@ -120,9 +78,40 @@ export default function Hero() {
     };
   }, []);
 
+  // TikTok-friendly user interaction
+  const handleHeroTap = async (
+    e: React.MouseEvent<HTMLDivElement>
+  ) => {
+    // Don't interfere with buttons or links
+    const target = e.target as HTMLElement;
+
+    if (
+      target.closest("a") ||
+      target.closest("button")
+    ) {
+      return;
+    }
+
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    try {
+      video.muted = true;
+      video.playsInline = true;
+
+      await video.play();
+
+      setVideoPlaying(true);
+    } catch (error) {
+      console.log("Video could not start:", error);
+    }
+  };
+
   return (
     <section
       id="home"
+      onClick={handleHeroTap}
       className="relative min-h-[100svh] w-full overflow-hidden bg-black"
     >
 
@@ -133,7 +122,7 @@ export default function Hero() {
         aria-hidden="true"
         className={`absolute inset-0 z-0 h-full w-full object-cover object-[center_40%] transition-opacity duration-700 ${
           videoPlaying
-            ? "opacity-0"
+            ? "pointer-events-none opacity-0"
             : "opacity-100"
         }`}
       />
