@@ -670,11 +670,7 @@ export default function Consultation() {
 
             </h4>
 
-  <h4 className="text-yellow-500 pt-4">
 
-              Budget
-
-            </h4>
 
 
 
@@ -851,7 +847,11 @@ export default function Consultation() {
 
             <div className="grid grid-cols-2 gap-4">
 
+<h4 className="text-yellow-500 pt-4">
 
+              Budget
+
+            </h4>
 
               <input
 
