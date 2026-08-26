@@ -8,7 +8,6 @@ export default function Hero() {
   const [isTikTokBrowser, setIsTikTokBrowser] = useState(false);
 
   useEffect(() => {
-    // Detect TikTok's in-app browser
     const userAgent = navigator.userAgent.toLowerCase();
 
     const isTikTok =
@@ -17,9 +16,10 @@ export default function Hero() {
 
     setIsTikTokBrowser(isTikTok);
 
-    // Don't attempt video playback inside TikTok
+    // TikTok gets the image + browser prompt.
     if (isTikTok) return;
 
+    // Instagram and normal browsers keep the video.
     const video = videoRef.current;
 
     if (!video) return;
@@ -33,7 +33,7 @@ export default function Hero() {
         await video.play();
       } catch {
         // Browser blocked autoplay.
-        // The poster image will remain visible.
+        // Poster image remains available.
       }
     };
 
@@ -94,6 +94,29 @@ export default function Hero() {
 
       {/* Bottom Blend */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-48 bg-gradient-to-t from-black via-black/40 to-transparent" />
+
+      {/* TikTok Browser Message */}
+      {isTikTokBrowser && (
+        <div className="absolute top-5 left-1/2 z-20 w-[calc(100%-40px)] max-w-md -translate-x-1/2">
+          <div className="rounded-2xl border border-white/15 bg-black/70 px-5 py-4 text-center shadow-2xl backdrop-blur-md">
+            <p className="text-sm font-medium text-white">
+              Experience the full presentation
+            </p>
+
+            <p className="mt-1 text-xs leading-relaxed text-gray-300">
+              Open this page in your browser to view the
+              full background video.
+            </p>
+
+            <p className="mt-3 text-xs text-yellow-500">
+              Tap ••• in TikTok, then choose
+              <span className="font-semibold">
+                {" "}Open in Browser
+              </span>
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Hero Content */}
       <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-6 pt-20 text-center">
