@@ -1,22 +1,86 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoReady, setVideoReady] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    // Make absolutely sure mobile autoplay requirements are met
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+
+    const playVideo = async () => {
+      try {
+        await video.play();
+      } catch (error) {
+        console.log("Video autoplay waiting:", error);
+      }
+    };
+
+    // Try immediately
+    playVideo();
+
+    // Try again once the browser has loaded enough video
+    const handleCanPlay = () => {
+      setVideoReady(true);
+      playVideo();
+    };
+
+    const handleLoadedData = () => {
+      setVideoReady(true);
+      playVideo();
+    };
+
+    video.addEventListener("canplay", handleCanPlay);
+    video.addEventListener("loadeddata", handleLoadedData);
+
+    // One additional attempt shortly after page load
+    const timeout = setTimeout(() => {
+      playVideo();
+    }, 500);
+
+    return () => {
+      clearTimeout(timeout);
+      video.removeEventListener("canplay", handleCanPlay);
+      video.removeEventListener("loadeddata", handleLoadedData);
+    };
+  }, []);
+
   return (
     <section
       id="home"
       className="relative min-h-[100svh] w-full overflow-hidden bg-black"
     >
+      {/* Background Poster */}
+      <div
+        className={`absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-700 ${
+          videoReady ? "opacity-0" : "opacity-100"
+        }`}
+        style={{
+          backgroundImage: "url('/images/dunia1.jpeg')",
+        }}
+      />
+
       {/* Background Video */}
       <video
+        ref={videoRef}
         autoPlay
         muted
         loop
         playsInline
         preload="auto"
         poster="/images/dunia1.jpeg"
+        disablePictureInPicture
         className="absolute inset-0 z-0 h-full w-full object-cover object-[center_40%]"
+        onCanPlay={() => setVideoReady(true)}
       >
         <source
           src="/videos/Hero-mobile.mp4"
