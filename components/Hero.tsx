@@ -1,19 +1,54 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 export default function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+
+    const startVideo = async () => {
+      try {
+        await video.play();
+      } catch (error) {
+        console.log("Autoplay prevented:", error);
+      }
+    };
+
+    // Try immediately
+    startVideo();
+
+    // Try again once the video is ready
+    video.addEventListener("loadeddata", startVideo);
+    video.addEventListener("canplay", startVideo);
+
+    return () => {
+      video.removeEventListener("loadeddata", startVideo);
+      video.removeEventListener("canplay", startVideo);
+    };
+  }, []);
+
   return (
     <section
       id="home"
       className="relative min-h-[100svh] w-full overflow-hidden bg-black"
     >
-      {/* Background Video */}
+      {/* Mobile Hero Video */}
       <video
+        ref={videoRef}
         autoPlay
         muted
         loop
         playsInline
+        webkit-playsinline="true"
         preload="auto"
         poster="/images/dunia1.jpeg"
         className="absolute inset-0 z-0 h-full w-full object-cover object-[center_40%]"
