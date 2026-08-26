@@ -79,7 +79,14 @@ export default function Consultation() {
     }
 
     setSubmitting(true);
-
+console.log("TRADE IN:", tradeIn);
+console.log("TRADE MILES RAW:", formData.trade_miles);
+console.log(
+  "TRADE MILES NUMBER:",
+  formData.trade_miles
+    ? Number(formData.trade_miles.replace(/,/g, ""))
+    : null
+);
     const { error } = await supabase.from("Leads").insert([
       {
         ...formData,
