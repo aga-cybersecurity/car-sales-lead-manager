@@ -284,17 +284,32 @@ export default function LeadDrawer({
   </p>
 
 
-  {lead.trade_in === "Yes" && (
-    <>
-      <p>
-        Trade Vehicle:
-        <span className="text-gray-400 ml-2">
-          {lead.trade_year} {lead.trade_model}
-        </span>
-      </p>
-    </>
-  )}
+{lead.trade_in === "Yes" && (
+  <>
+    <p>
+      Trade Vehicle:
+      <span className="text-gray-400 ml-2">
+        {lead.trade_year} {lead.trade_model || "Not provided"}
+      </span>
+    </p>
 
+    <p>
+      Mileage:
+      <span className="text-gray-400 ml-2">
+        {lead.trade_miles
+          ? Number(lead.trade_miles).toLocaleString()
+          : "Not provided"}
+      </span>
+    </p>
+
+    <p>
+      VIN:
+      <span className="text-gray-400 ml-2">
+        {lead.trade_vin || "Not provided"}
+      </span>
+    </p>
+  </>
+)}
 
 </div>
 
