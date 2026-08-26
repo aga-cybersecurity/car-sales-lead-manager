@@ -96,8 +96,8 @@ export default function Consultation() {
           : null,
 
         trade_miles: formData.trade_miles
-          ? Number(formData.trade_miles)
-          : null,
+  ? Number(formData.trade_miles.replace(/,/g, ""))
+  : null,
       },
     ]);
 
