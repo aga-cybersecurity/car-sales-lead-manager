@@ -409,7 +409,6 @@ export default function Consultation() {
 </p>
 
 <div className="flex gap-3 flex-wrap">
-
   {["Yes", "No"].map((item) => (
     <button
       key={item}
@@ -424,7 +423,6 @@ export default function Consultation() {
       {item}
     </button>
   ))}
-
 </div>
 
 {tradeIn === "Yes" && (
@@ -454,25 +452,31 @@ export default function Consultation() {
       }
     />
 
-    <input
-  type="text"
-  inputMode="numeric"
-  placeholder="Trade-In Mileage"
-  className="input-style"
-  value={formData.trade_miles || ""}
-  onChange={(e) =>
-    setFormData({
-      ...formData,
-      trade_miles: e.target.value
-        .replace(/\D/g, "")
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-    })
-  }
-/>
-
+    {/* TRADE-IN MILEAGE */}
     <input
       type="text"
-      maxLength="17"
+      inputMode="numeric"
+      placeholder="Trade-In Mileage"
+      className="input-style"
+      value={formData.trade_miles || ""}
+      onChange={(e) => {
+        const numbers = e.target.value.replace(/\D/g, "");
+
+        const formatted = numbers
+          ? Number(numbers).toLocaleString()
+          : "";
+
+        setFormData({
+          ...formData,
+          trade_miles: formatted,
+        });
+      }}
+    />
+
+    {/* TRADE-IN VIN */}
+    <input
+      type="text"
+      maxLength={17}
       placeholder="Trade-In VIN"
       className="input-style"
       value={formData.trade_vin || ""}
