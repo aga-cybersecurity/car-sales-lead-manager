@@ -455,18 +455,20 @@ export default function Consultation() {
     />
 
     <input
-      type="number"
-      min="0"
-      placeholder="Trade-In Mileage"
-      className="input-style"
-      value={formData.trade_miles || ""}
-      onChange={(e) =>
-        setFormData({
-          ...formData,
-          trade_miles: e.target.value,
-        })
-      }
-    />
+  type="text"
+  inputMode="numeric"
+  placeholder="Trade-In Mileage"
+  className="input-style"
+  value={formData.trade_miles || ""}
+  onChange={(e) =>
+    setFormData({
+      ...formData,
+      trade_miles: e.target.value
+        .replace(/\D/g, "")
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+    })
+  }
+/>
 
     <input
       type="text"
