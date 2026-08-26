@@ -22,6 +22,8 @@ export default function Consultation() {
 
     trade_year: "",
     trade_model: "",
+    trade_miles: "",
+    trade_vin: "",
 
     budget_min: "",
     budget_max: "",
@@ -92,6 +94,10 @@ export default function Consultation() {
         budget_max: formData.budget_max
           ? Number(formData.budget_max.replace(/\D/g, ""))
           : null,
+
+        trade_miles: formData.trade_miles
+          ? Number(formData.trade_miles)
+          : null,
       },
     ]);
 
@@ -115,6 +121,8 @@ export default function Consultation() {
 
         trade_year: "",
         trade_model: "",
+        trade_miles: "",
+        trade_vin: "",
 
         budget_min: "",
         budget_max: "",
@@ -288,7 +296,7 @@ export default function Consultation() {
               <input
                 placeholder="Vehicle Make & Model"
                 className="input-style"
-                value={formData.make_model || ""}
+                value={formData.make_model}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -300,7 +308,7 @@ export default function Consultation() {
               <input
                 placeholder="Vehicle Year"
                 className="input-style"
-                value={formData.year || ""}
+                value={formData.year}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -312,7 +320,7 @@ export default function Consultation() {
               <input
                 placeholder="Trim (Optional)"
                 className="input-style"
-                value={formData.trim || ""}
+                value={formData.trim}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -324,7 +332,7 @@ export default function Consultation() {
               <input
                 placeholder="Stock Number (Optional)"
                 className="input-style"
-                value={formData.stock_number || ""}
+                value={formData.stock_number}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -420,11 +428,12 @@ export default function Consultation() {
             </div>
 
             {tradeIn === "Yes" && (
-              <>
+              <div className="space-y-4">
+
                 <input
                   placeholder="Trade-In Year"
                   className="input-style"
-                  value={formData.trade_year || ""}
+                  value={formData.trade_year}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -436,7 +445,7 @@ export default function Consultation() {
                 <input
                   placeholder="Trade-In Make & Model"
                   className="input-style"
-                  value={formData.trade_model || ""}
+                  value={formData.trade_model}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -444,7 +453,35 @@ export default function Consultation() {
                     })
                   }
                 />
-              </>
+
+                <input
+                  type="number"
+                  placeholder="Trade-In Mileage"
+                  className="input-style"
+                  value={formData.trade_miles}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      trade_miles: e.target.value,
+                    })
+                  }
+                />
+
+                <input
+                  type="text"
+                  placeholder="Trade-In VIN"
+                  maxLength={17}
+                  className="input-style uppercase"
+                  value={formData.trade_vin}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      trade_vin: e.target.value.toUpperCase(),
+                    })
+                  }
+                />
+
+              </div>
             )}
 
             {/* BUDGET */}
@@ -459,7 +496,7 @@ export default function Consultation() {
                 type="text"
                 placeholder="Minimum Budget"
                 className="input-style"
-                value={formData.budget_min || ""}
+                value={formData.budget_min}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -472,7 +509,7 @@ export default function Consultation() {
                 type="text"
                 placeholder="Maximum Budget"
                 className="input-style"
-                value={formData.budget_max || ""}
+                value={formData.budget_max}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -493,7 +530,7 @@ export default function Consultation() {
               rows="5"
               placeholder="Questions, special requests, or appointment scheduling details"
               className="input-style"
-              value={formData.notes || ""}
+              value={formData.notes}
               onChange={(e) =>
                 setFormData({
                   ...formData,
@@ -534,7 +571,6 @@ export default function Consultation() {
         </div>
 
       </div>
-
     </section>
   );
 }
