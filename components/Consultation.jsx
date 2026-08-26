@@ -13,21 +13,17 @@ export default function Consultation() {
     last_name: "",
     phone: "",
     email: "",
-
     make_model: "",
     year: "",
     trim: "",
     stock_number: "",
     factory_order: "",
-
     trade_year: "",
     trade_model: "",
     trade_miles: "",
     trade_vin: "",
-
     budget_min: "",
     budget_max: "",
-
     notes: "",
   });
 
@@ -59,95 +55,99 @@ export default function Consultation() {
   }
 
   async function handleSubmit(e) {
-    async function handleSubmit(e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (
-    !formData.first_name ||
-    !formData.last_name ||
-    !formData.phone
-  ) {
-    alert("Please fill in First Name, Last Name, and Phone Number.");
-    return;
-  }
+    if (
+      !formData.first_name ||
+      !formData.last_name ||
+      !formData.phone
+    ) {
+      alert("Please fill in First Name, Last Name, and Phone Number.");
+      return;
+    }
 
-  if (
-    formData.email &&
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
-  ) {
-    alert("Please enter a valid email address.");
-    return;
-  }
+    if (
+      formData.email &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+    ) {
+      alert("Please enter a valid email address.");
+      return;
+    }
 
-  setSubmitting(true);
+    setSubmitting(true);
 
-  // Convert formatted mileage like "45,000" into 45000
-  const mileage =
-    formData.trade_miles &&
-    formData.trade_miles.toString().replace(/,/g, "").trim() !== ""
-      ? Number(
-          formData.trade_miles.toString().replace(/,/g, "").trim()
-        )
-      : null;
+    /*
+      Convert formatted mileage such as:
+      "45,000"
+      into:
+      45000
+    */
+    const mileage =
+      formData.trade_miles &&
+      formData.trade_miles.toString().replace(/,/g, "").trim() !== ""
+        ? Number(
+            formData.trade_miles.toString().replace(/,/g, "").trim()
+          )
+        : null;
 
-  console.log("TRADE IN:", tradeIn);
-  console.log("TRADE MILES RAW:", formData.trade_miles);
-  console.log("TRADE MILES TO SAVE:", mileage);
+    console.log("TRADE IN:", tradeIn);
+    console.log("TRADE MILES RAW:", formData.trade_miles);
+    console.log("TRADE MILES TO SAVE:", mileage);
 
-  const leadData = {
-    ...formData,
+    const leadData = {
+      ...formData,
 
-    payment_method: payment || null,
-    trade_in: tradeIn || null,
+      payment_method: payment || null,
 
-    budget_min: formData.budget_min
-      ? Number(formData.budget_min.replace(/\D/g, ""))
-      : null,
+      trade_in: tradeIn || null,
 
-    budget_max: formData.budget_max
-      ? Number(formData.budget_max.replace(/\D/g, ""))
-      : null,
+      budget_min: formData.budget_min
+        ? Number(formData.budget_min.replace(/\D/g, ""))
+        : null,
 
-    trade_miles: mileage,
-  };
+      budget_max: formData.budget_max
+        ? Number(formData.budget_max.replace(/\D/g, ""))
+        : null,
 
-  console.log("FINAL LEAD DATA:", leadData);
+      trade_miles: mileage,
+    };
 
-  const { error } = await supabase
-    .from("Leads")
-    .insert([leadData]);
+    console.log("FINAL LEAD DATA:", leadData);
 
-  if (error) {
-    console.error("SUPABASE ERROR:", error);
-    alert(error.message);
-  } else {
-    alert("Your consultation request has been submitted!");
+    const { error } = await supabase
+      .from("Leads")
+      .insert([leadData]);
 
-    setFormData({
-      first_name: "",
-      last_name: "",
-      phone: "",
-      email: "",
-      make_model: "",
-      year: "",
-      trim: "",
-      stock_number: "",
-      factory_order: "",
-      trade_year: "",
-      trade_model: "",
-      trade_miles: "",
-      trade_vin: "",
-      budget_min: "",
-      budget_max: "",
-      notes: "",
-    });
+    if (error) {
+      console.error("SUPABASE ERROR:", error);
+      alert(error.message);
+    } else {
+      alert("Your consultation request has been submitted!");
 
-    setPayment("");
-    setTradeIn("");
-  }
+      setFormData({
+        first_name: "",
+        last_name: "",
+        phone: "",
+        email: "",
+        make_model: "",
+        year: "",
+        trim: "",
+        stock_number: "",
+        factory_order: "",
+        trade_year: "",
+        trade_model: "",
+        trade_miles: "",
+        trade_vin: "",
+        budget_min: "",
+        budget_max: "",
+        notes: "",
+      });
 
-  setSubmitting(false);
-}
+      setPayment("");
+      setTradeIn("");
+    }
+
+    setSubmitting(false);
   }
 
   return (
@@ -158,9 +158,7 @@ export default function Consultation() {
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-14 items-start">
 
         {/* LEFT SIDE */}
-
         <div className="space-y-8">
-
           <div>
             <p className="text-yellow-500 uppercase tracking-[0.3em] text-sm mb-4">
               Personalized Luxury Experience
@@ -186,13 +184,10 @@ export default function Consultation() {
 
             <div className="absolute inset-0 bg-black/20" />
           </div>
-
         </div>
 
         {/* RIGHT SIDE FORM */}
-
         <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-8 shadow-2xl">
-
           <h3 className="text-2xl font-semibold mb-8">
             Schedule Your Consultation
           </h3>
@@ -203,13 +198,11 @@ export default function Consultation() {
           >
 
             {/* BUYER INFORMATION */}
-
             <h4 className="text-yellow-500">
               Buyer Information
             </h4>
 
             <div className="grid md:grid-cols-2 gap-4">
-
               <input
                 required
                 placeholder="First Name"
@@ -235,7 +228,6 @@ export default function Consultation() {
                   })
                 }
               />
-
             </div>
 
             <input
@@ -265,7 +257,6 @@ export default function Consultation() {
             />
 
             {/* VEHICLE INTEREST */}
-
             <h4 className="text-yellow-500 pt-4">
               Vehicle Interest
             </h4>
@@ -276,7 +267,6 @@ export default function Consultation() {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
               <a
                 href="https://www.landrovernovi.com/new-inventory/index.htm"
                 target="_blank"
@@ -294,14 +284,12 @@ export default function Consultation() {
               >
                 Browse Pre-Owned
               </a>
-
             </div>
 
             <div
               id="vehicleInterest"
               className="space-y-4 pt-4"
             >
-
               <p className="text-sm text-gray-400">
                 Found a vehicle you love?
               </p>
@@ -353,17 +341,14 @@ export default function Consultation() {
                   })
                 }
               />
-
             </div>
 
             {/* FACTORY ORDER */}
-
             <p className="text-sm text-gray-400 mt-4">
               Interested in placing a factory order?
             </p>
 
             <div className="flex gap-3 flex-wrap">
-
               {["Yes", "No"].map((item) => (
                 <button
                   key={item}
@@ -383,11 +368,9 @@ export default function Consultation() {
                   {item}
                 </button>
               ))}
-
             </div>
 
             {/* PURCHASE DETAILS */}
-
             <h4 className="text-yellow-500 pt-4">
               Purchase Details
             </h4>
@@ -397,7 +380,6 @@ export default function Consultation() {
             </p>
 
             <div className="flex gap-3 flex-wrap">
-
               {["Cash", "Financing", "Lease"].map((item) => (
                 <button
                   key={item}
@@ -412,105 +394,101 @@ export default function Consultation() {
                   {item}
                 </button>
               ))}
-
             </div>
 
             {/* TRADE IN */}
+            <p className="text-sm text-gray-400 mt-4">
+              Trade-In Vehicle
+            </p>
 
-<p className="text-sm text-gray-400 mt-4">
-  Trade-In Vehicle
-</p>
+            <div className="flex gap-3 flex-wrap">
+              {["Yes", "No"].map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setTradeIn(item)}
+                  className={`px-5 py-3 rounded-xl border transition cursor-pointer ${
+                    tradeIn === item
+                      ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                      : "border-zinc-700 text-gray-300 hover:border-yellow-500"
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
 
-<div className="flex gap-3 flex-wrap">
-  {["Yes", "No"].map((item) => (
-    <button
-      key={item}
-      type="button"
-      onClick={() => setTradeIn(item)}
-      className={`px-5 py-3 rounded-xl border transition cursor-pointer ${
-        tradeIn === item
-          ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-          : "border-zinc-700 text-gray-300 hover:border-yellow-500"
-      }`}
-    >
-      {item}
-    </button>
-  ))}
-</div>
+            {tradeIn === "Yes" && (
+              <div className="space-y-4">
 
-{tradeIn === "Yes" && (
-  <div className="space-y-4">
+                <input
+                  placeholder="Trade-In Year"
+                  className="input-style"
+                  value={formData.trade_year || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      trade_year: e.target.value,
+                    })
+                  }
+                />
 
-    <input
-      placeholder="Trade-In Year"
-      className="input-style"
-      value={formData.trade_year || ""}
-      onChange={(e) =>
-        setFormData({
-          ...formData,
-          trade_year: e.target.value,
-        })
-      }
-    />
+                <input
+                  placeholder="Trade-In Make & Model"
+                  className="input-style"
+                  value={formData.trade_model || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      trade_model: e.target.value,
+                    })
+                  }
+                />
 
-    <input
-      placeholder="Trade-In Make & Model"
-      className="input-style"
-      value={formData.trade_model || ""}
-      onChange={(e) =>
-        setFormData({
-          ...formData,
-          trade_model: e.target.value,
-        })
-      }
-    />
+                {/* TRADE-IN MILEAGE */}
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Trade-In Mileage"
+                  className="input-style"
+                  value={formData.trade_miles || ""}
+                  onChange={(e) => {
+                    const numbers = e.target.value.replace(/\D/g, "");
 
-    {/* TRADE-IN MILEAGE */}
-    <input
-      type="text"
-      inputMode="numeric"
-      placeholder="Trade-In Mileage"
-      className="input-style"
-      value={formData.trade_miles || ""}
-      onChange={(e) => {
-        const numbers = e.target.value.replace(/\D/g, "");
+                    const formatted = numbers
+                      ? Number(numbers).toLocaleString()
+                      : "";
 
-        const formatted = numbers
-          ? Number(numbers).toLocaleString()
-          : "";
+                    setFormData({
+                      ...formData,
+                      trade_miles: formatted,
+                    });
+                  }}
+                />
 
-        setFormData({
-          ...formData,
-          trade_miles: formatted,
-        });
-      }}
-    />
+                {/* TRADE-IN VIN */}
+                <input
+                  type="text"
+                  maxLength={17}
+                  placeholder="Trade-In VIN"
+                  className="input-style"
+                  value={formData.trade_vin || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      trade_vin: e.target.value.toUpperCase(),
+                    })
+                  }
+                />
+              </div>
+            )}
 
-    {/* TRADE-IN VIN */}
-    <input
-      type="text"
-      maxLength={17}
-      placeholder="Trade-In VIN"
-      className="input-style"
-      value={formData.trade_vin || ""}
-      onChange={(e) =>
-        setFormData({
-          ...formData,
-          trade_vin: e.target.value.toUpperCase(),
-        })
-      }
-    />
-
-  </div>
-)}
             {/* BUDGET */}
-
             <h4 className="text-yellow-500 pt-4">
               Budget
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
               <input
                 type="text"
                 placeholder="Minimum Budget"
@@ -536,11 +514,9 @@ export default function Consultation() {
                   })
                 }
               />
-
             </div>
 
             {/* ADDITIONAL NOTES */}
-
             <h4 className="text-yellow-500 pt-4">
               Additional Notes
             </h4>
@@ -559,9 +535,7 @@ export default function Consultation() {
             />
 
             {/* CONSENT */}
-
             <label className="flex gap-3 text-sm text-gray-400">
-
               <input
                 type="checkbox"
                 required
@@ -570,11 +544,9 @@ export default function Consultation() {
               <span>
                 I agree to be contacted regarding my inquiry.
               </span>
-
             </label>
 
             {/* SUBMIT */}
-
             <button
               type="submit"
               disabled={submitting}
@@ -586,9 +558,7 @@ export default function Consultation() {
             </button>
 
           </form>
-
         </div>
-
       </div>
     </section>
   );
