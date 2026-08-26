@@ -15,24 +15,49 @@ export default function Hero() {
     video.defaultMuted = true;
     video.playsInline = true;
 
-    const startVideo = async () => {
-      try {
-        await video.play();
-      } catch (error) {
-        console.log("Autoplay prevented:", error);
+    const startVideo = () => {
+      video.play().catch(() => {
+        // Safari may reject autoplay, especially with
+        // Low Power Mode enabled.
+      });
+    };
+
+    // Initial attempt
+    startVideo();
+
+    // Try again when video becomes available
+    video.addEventListener("loadeddata", startVideo);
+    video.addEventListener("canplay", startVideo);
+
+    // Try again when Safari brings the page back
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        startVideo();
       }
     };
 
-    // Try immediately
-    startVideo();
+    // Try again when Safari restores the page
+    const handlePageShow = () => {
+      startVideo();
+    };
 
-    // Try again once the video is ready
-    video.addEventListener("loadeddata", startVideo);
-    video.addEventListener("canplay", startVideo);
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange
+    );
+
+    window.addEventListener("pageshow", handlePageShow);
 
     return () => {
       video.removeEventListener("loadeddata", startVideo);
       video.removeEventListener("canplay", startVideo);
+
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
+
+      window.removeEventListener("pageshow", handlePageShow);
     };
   }, []);
 
@@ -48,7 +73,6 @@ export default function Hero() {
         muted
         loop
         playsInline
-        webkit-playsinline="true"
         preload="auto"
         poster="/images/dunia1.jpeg"
         className="absolute inset-0 z-0 h-full w-full object-cover object-[center_40%]"
