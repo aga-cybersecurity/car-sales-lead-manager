@@ -1,115 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function Hero() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoPlaying, setVideoPlaying] = useState(false);
-
-  useEffect(() => {
-    const video = videoRef.current;
-
-    if (!video) return;
-
-    video.muted = true;
-    video.defaultMuted = true;
-    video.playsInline = true;
-
-    const startVideo = async () => {
-      try {
-        video.currentTime = 0;
-
-        const promise = video.play();
-
-        if (promise !== undefined) {
-          await promise;
-        }
-
-        setVideoPlaying(true);
-      } catch (error) {
-        console.log("Autoplay attempt:", error);
-      }
-    };
-
-    const handleLoadedData = () => {
-      startVideo();
-    };
-
-    const handleCanPlay = () => {
-      startVideo();
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        startVideo();
-      }
-    };
-
-    const handlePageShow = () => {
-      startVideo();
-    };
-
-    video.addEventListener("loadeddata", handleLoadedData);
-    video.addEventListener("canplay", handleCanPlay);
-    document.addEventListener(
-      "visibilitychange",
-      handleVisibilityChange
-    );
-    window.addEventListener("pageshow", handlePageShow);
-
-    // Multiple attempts during initial loading
-    startVideo();
-
-    const timer1 = setTimeout(startVideo, 300);
-    const timer2 = setTimeout(startVideo, 1000);
-    const timer3 = setTimeout(startVideo, 2000);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-
-      video.removeEventListener(
-        "loadeddata",
-        handleLoadedData
-      );
-
-      video.removeEventListener(
-        "canplay",
-        handleCanPlay
-      );
-
-      document.removeEventListener(
-        "visibilitychange",
-        handleVisibilityChange
-      );
-
-      window.removeEventListener(
-        "pageshow",
-        handlePageShow
-      );
-    };
-  }, []);
-
   return (
     <section
       id="home"
       className="relative min-h-[100svh] w-full overflow-hidden bg-black"
     >
-      {/* Poster / Immediate Background */}
-      <div
-        className={`absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500 ${
-          videoPlaying ? "opacity-0" : "opacity-100"
-        }`}
-        style={{
-          backgroundImage: "url('/images/dunia1.jpeg')",
-        }}
-      />
-
-      {/* Mobile Hero Video */}
+      {/* Background Video */}
       <video
-        ref={videoRef}
         autoPlay
         muted
         loop
