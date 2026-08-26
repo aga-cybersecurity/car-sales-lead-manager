@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import StatsCards from "./components/StatsCards";
 import LeadsTable from "./components/LeadsTable";
 import LeadDrawer from "./components/LeadDrawer";
+import AddLeadDrawer from "./components/AddLeadDrawer";
 import UpcomingAppointments from "./components/UpcomingAppointments";
 import LeadPipeline from "./components/LeadPipeline";
 
@@ -16,6 +17,8 @@ export default function Dashboard() {
   const [leads, setLeads] = useState([]);
   const [deletedLeads, setDeletedLeads] = useState([]);
   const [selectedLead, setSelectedLead] = useState(null);
+
+  const [showAddLead, setShowAddLead] = useState(false);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -103,9 +106,6 @@ export default function Dashboard() {
 
   /*
    * SOFT DELETE LEAD
-   *
-   * Instead of permanently deleting the lead,
-   * we add a deleted_at timestamp.
    */
   async function deleteLead(id) {
     if (!id) {
@@ -150,7 +150,6 @@ export default function Dashboard() {
       return;
     }
 
-    // Close drawer if deleted lead was open
     setSelectedLead((current) =>
       current?.id === id ? null : current
     );
@@ -160,9 +159,6 @@ export default function Dashboard() {
 
   /*
    * RESTORE LEAD
-   *
-   * Sets deleted_at back to NULL,
-   * which puts the lead back into active leads.
    */
   async function restoreLead(id) {
     if (!id) {
@@ -272,11 +268,13 @@ export default function Dashboard() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-black text-white">
         <div className="text-center">
+
           <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-yellow-500" />
 
           <p className="text-sm text-gray-400">
             Checking authentication...
           </p>
+
         </div>
       </main>
     );
@@ -287,6 +285,7 @@ export default function Dashboard() {
    */
   return (
     <main className="min-h-screen bg-black p-10 text-white">
+
       <div className="mx-auto max-w-7xl">
 
         {/* HEADER */}
@@ -302,18 +301,38 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={loggingOut}
-            className="rounded-xl border border-zinc-700 bg-zinc-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {loggingOut ? "Signing Out..." : "Sign Out"}
-          </button>
+          <div className="flex items-center gap-3">
+
+            {/* ADD NEW LEAD */}
+
+            <button
+              type="button"
+              onClick={() => setShowAddLead(true)}
+              className="rounded-xl bg-yellow-500 px-5 py-3 text-sm font-semibold text-black transition hover:bg-yellow-400"
+            >
+              + Add New Lead
+            </button>
+
+            {/* SIGN OUT */}
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="rounded-xl border border-zinc-700 bg-zinc-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loggingOut
+                ? "Signing Out..."
+                : "Sign Out"}
+            </button>
+
+          </div>
 
         </div>
 
+
         {/* UPCOMING APPOINTMENTS */}
+
         <section>
           <UpcomingAppointments
             leads={leads}
@@ -321,12 +340,16 @@ export default function Dashboard() {
           />
         </section>
 
+
         {/* STATS */}
+
         <section className="mt-10">
           <StatsCards leads={leads} />
         </section>
 
+
         {/* PIPELINE */}
+
         <section className="mt-10">
           <LeadPipeline
             leads={filteredLeads}
@@ -335,8 +358,11 @@ export default function Dashboard() {
           />
         </section>
 
+
         {/* SEARCH AND FILTERS */}
+
         <section className="mt-10">
+
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
 
             <h2 className="mb-4 text-xl font-semibold">
@@ -347,7 +373,9 @@ export default function Dashboard() {
               type="text"
               placeholder="Search name, email, or phone..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
               className="mb-4 w-full rounded-lg border border-zinc-700 bg-zinc-800 p-3 text-white outline-none placeholder:text-gray-500 focus:border-yellow-600"
             />
 
@@ -360,16 +388,37 @@ export default function Dashboard() {
                 }
                 className="rounded-lg border border-zinc-700 bg-zinc-800 p-3 text-white outline-none"
               >
-                <option value="All">All</option>
-                <option value="New Lead">New Lead</option>
-                <option value="Contacted">Contacted</option>
+
+                <option value="All">
+                  All
+                </option>
+
+                <option value="New Lead">
+                  New Lead
+                </option>
+
+                <option value="Contacted">
+                  Contacted
+                </option>
+
                 <option value="Follow-Up Needed">
                   Follow-Up Needed
                 </option>
-                <option value="Qualified">Qualified</option>
-                <option value="Closed">Closed</option>
-                <option value="Lost">Lost</option>
+
+                <option value="Qualified">
+                  Qualified
+                </option>
+
+                <option value="Closed">
+                  Closed
+                </option>
+
+                <option value="Lost">
+                  Lost
+                </option>
+
               </select>
+
 
               <select
                 value={appointmentFilter}
@@ -378,6 +427,7 @@ export default function Dashboard() {
                 }
                 className="rounded-lg border border-zinc-700 bg-zinc-800 p-3 text-white outline-none"
               >
+
                 <option value="All">
                   All Appointments
                 </option>
@@ -389,14 +439,20 @@ export default function Dashboard() {
                 <option value="None">
                   No Appointment
                 </option>
+
               </select>
 
             </div>
+
           </div>
+
         </section>
 
+
         {/* CLIENT LEADS */}
+
         <section className="mt-10">
+
           <LeadsTable
             leads={filteredLeads}
             deletedLeads={deletedLeads}
@@ -405,22 +461,42 @@ export default function Dashboard() {
             deleteLead={deleteLead}
             restoreLead={restoreLead}
           />
+
         </section>
 
+
         {/* LEAD DRAWER */}
+
         <LeadDrawer
           lead={selectedLead}
-          closeDrawer={() => setSelectedLead(null)}
+          closeDrawer={() =>
+            setSelectedLead(null)
+          }
           updateStatus={updateStatus}
           refreshLeads={fetchLeads}
         />
 
+
+        {/* ADD NEW LEAD DRAWER */}
+
+        {showAddLead && (
+          <AddLeadDrawer
+            closeDrawer={() =>
+              setShowAddLead(false)
+            }
+            refreshLeads={fetchLeads}
+          />
+        )}
+
       </div>
 
+
       {/* FOOTER */}
+
       <footer className="mt-16 border-t border-zinc-800 pt-6 text-center text-sm text-gray-500">
         © 2026 Dunia Arkoub · Designed by AGA CyberWorks
       </footer>
+
     </main>
   );
 }
