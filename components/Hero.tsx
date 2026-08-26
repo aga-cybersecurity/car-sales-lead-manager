@@ -5,9 +5,21 @@ import { motion } from "framer-motion";
 
 export default function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoFailed, setVideoFailed] = useState(false);
+  const [isTikTokBrowser, setIsTikTokBrowser] = useState(false);
 
   useEffect(() => {
+    // Detect TikTok's in-app browser
+    const userAgent = navigator.userAgent.toLowerCase();
+
+    const isTikTok =
+      userAgent.includes("tiktok") ||
+      userAgent.includes("musical_ly");
+
+    setIsTikTokBrowser(isTikTok);
+
+    // Don't attempt video playback inside TikTok
+    if (isTikTok) return;
+
     const video = videoRef.current;
 
     if (!video) return;
@@ -16,31 +28,31 @@ export default function Hero() {
     video.defaultMuted = true;
     video.playsInline = true;
 
-    const playVideo = async () => {
+    const tryPlayVideo = async () => {
       try {
         await video.play();
-        setVideoFailed(false);
       } catch {
-        console.log("Autoplay blocked by browser.");
+        // Browser blocked autoplay.
+        // The poster image will remain visible.
       }
     };
 
-    playVideo();
+    tryPlayVideo();
 
     const handleCanPlay = () => {
-      playVideo();
+      tryPlayVideo();
     };
 
-    const handleError = () => {
-      setVideoFailed(true);
+    const handleLoadedData = () => {
+      tryPlayVideo();
     };
 
     video.addEventListener("canplay", handleCanPlay);
-    video.addEventListener("error", handleError);
+    video.addEventListener("loadeddata", handleLoadedData);
 
     return () => {
       video.removeEventListener("canplay", handleCanPlay);
-      video.removeEventListener("error", handleError);
+      video.removeEventListener("loadeddata", handleLoadedData);
     };
   }, []);
 
@@ -49,9 +61,16 @@ export default function Hero() {
       id="home"
       className="relative min-h-[100svh] w-full overflow-hidden bg-black"
     >
+      {/* Background Image */}
+      <img
+        src="/images/dunia1.jpeg"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 z-0 h-full w-full object-cover object-[center_40%]"
+      />
 
       {/* Background Video */}
-      {!videoFailed && (
+      {!isTikTokBrowser && (
         <video
           ref={videoRef}
           autoPlay
@@ -68,16 +87,6 @@ export default function Hero() {
             type="video/mp4"
           />
         </video>
-      )}
-
-      {/* Fallback Image */}
-      {videoFailed && (
-        <img
-          src="/images/dunia1.jpeg"
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 z-0 h-full w-full object-cover object-[center_40%]"
-        />
       )}
 
       {/* Luxury Overlay */}
