@@ -404,86 +404,86 @@ export default function Consultation() {
 
             {/* TRADE IN */}
 
-            <p className="text-sm text-gray-400 mt-4">
-              Trade-In Vehicle
-            </p>
+<p className="text-sm text-gray-400 mt-4">
+  Trade-In Vehicle
+</p>
 
-            <div className="flex gap-3 flex-wrap">
+<div className="flex gap-3 flex-wrap">
 
-              {["Yes", "No"].map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setTradeIn(item)}
-                  className={`px-5 py-3 rounded-xl border transition cursor-pointer ${
-                    tradeIn === item
-                      ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                      : "border-zinc-700 text-gray-300 hover:border-yellow-500"
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
+  {["Yes", "No"].map((item) => (
+    <button
+      key={item}
+      type="button"
+      onClick={() => setTradeIn(item)}
+      className={`px-5 py-3 rounded-xl border transition cursor-pointer ${
+        tradeIn === item
+          ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+          : "border-zinc-700 text-gray-300 hover:border-yellow-500"
+      }`}
+    >
+      {item}
+    </button>
+  ))}
 
-            </div>
+</div>
 
-            {tradeIn === "Yes" && (
-              <div className="space-y-4">
+{tradeIn === "Yes" && (
+  <div className="space-y-4">
 
-                <input
-                  placeholder="Trade-In Year"
-                  className="input-style"
-                  value={formData.trade_year}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      trade_year: e.target.value,
-                    })
-                  }
-                />
+    <input
+      placeholder="Trade-In Year"
+      className="input-style"
+      value={formData.trade_year || ""}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          trade_year: e.target.value,
+        })
+      }
+    />
 
-                <input
-                  placeholder="Trade-In Make & Model"
-                  className="input-style"
-                  value={formData.trade_model}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      trade_model: e.target.value,
-                    })
-                  }
-                />
+    <input
+      placeholder="Trade-In Make & Model"
+      className="input-style"
+      value={formData.trade_model || ""}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          trade_model: e.target.value,
+        })
+      }
+    />
 
-                <input
-                  type="number"
-                  placeholder="Trade-In Mileage"
-                  className="input-style"
-                  value={formData.trade_miles}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      trade_miles: e.target.value,
-                    })
-                  }
-                />
+    <input
+      type="number"
+      min="0"
+      placeholder="Trade-In Mileage"
+      className="input-style"
+      value={formData.trade_miles || ""}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          trade_miles: e.target.value,
+        })
+      }
+    />
 
-                <input
-                  type="text"
-                  placeholder="Trade-In VIN"
-                  maxLength={17}
-                  className="input-style uppercase"
-                  value={formData.trade_vin}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      trade_vin: e.target.value.toUpperCase(),
-                    })
-                  }
-                />
+    <input
+      type="text"
+      maxLength="17"
+      placeholder="Trade-In VIN"
+      className="input-style"
+      value={formData.trade_vin || ""}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          trade_vin: e.target.value.toUpperCase(),
+        })
+      }
+    />
 
-              </div>
-            )}
-
+  </div>
+)}
             {/* BUDGET */}
 
             <h4 className="text-yellow-500 pt-4">
