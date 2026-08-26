@@ -18,21 +18,21 @@ export default function Hero() {
 
     const tryPlayVideo = async () => {
       try {
+        video.muted = true;
+        video.playsInline = true;
+
         await video.play();
 
-        // Video successfully started
         setVideoPlaying(true);
       } catch {
-        // Safari blocked autoplay.
-        // Keep the poster image visible.
         setVideoPlaying(false);
       }
     };
 
-    // Try immediately
+    // Initial attempt
     tryPlayVideo();
 
-    // Try again when enough video data has loaded
+    // Try again once video data is available
     const handleLoadedData = () => {
       tryPlayVideo();
     };
@@ -41,29 +41,42 @@ export default function Hero() {
       tryPlayVideo();
     };
 
-    // If Safari pauses/rejects the video,
-    // keep the poster visible.
-    const handlePause = () => {
-      if (video.currentTime === 0) {
-        setVideoPlaying(false);
-      }
-    };
-
-    video.addEventListener("loadeddata", handleLoadedData);
-    video.addEventListener("canplay", handleCanPlay);
-    video.addEventListener("pause", handlePause);
-
-    // Retry when the page becomes visible again
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        tryPlayVideo();
-      }
-    };
-
-    // Retry when Safari restores the page
-    const handlePageShow = () => {
+    // Try again when video is loaded
+    const handleLoadedMetadata = () => {
       tryPlayVideo();
     };
+
+    // If the video gets paused, try again
+    const handlePause = () => {
+      if (!document.hidden) {
+        setTimeout(() => {
+          tryPlayVideo();
+        }, 300);
+      }
+    };
+
+    // TikTok / Safari may restore the page after opening it
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        setTimeout(() => {
+          tryPlayVideo();
+        }, 200);
+      }
+    };
+
+    const handlePageShow = () => {
+      setTimeout(() => {
+        tryPlayVideo();
+      }, 200);
+    };
+
+    // Try again when the browser finishes loading
+    window.addEventListener("load", tryPlayVideo);
+
+    video.addEventListener("loadeddata", handleLoadedData);
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("canplay", handleCanPlay);
+    video.addEventListener("pause", handlePause);
 
     document.addEventListener(
       "visibilitychange",
@@ -73,9 +86,16 @@ export default function Hero() {
     window.addEventListener("pageshow", handlePageShow);
 
     return () => {
+      window.removeEventListener("load", tryPlayVideo);
+
       video.removeEventListener(
         "loadeddata",
         handleLoadedData
+      );
+
+      video.removeEventListener(
+        "loadedmetadata",
+        handleLoadedMetadata
       );
 
       video.removeEventListener(
