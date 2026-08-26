@@ -848,71 +848,38 @@ export default function Consultation() {
             <div className="grid grid-cols-2 gap-4">
 
 <h4 className="text-yellow-500 pt-4">
+  Budget
+</h4>
 
-              Budget
+<div className="grid grid-cols-2 gap-4">
 
-            </h4>
+  <input
+    type="text"
+    placeholder="Minimum Budget"
+    className="input-style"
+    value={formData.budget_min || ""}
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        budget_min: formatCurrency(e.target.value)
+      })
+    }
+  />
 
-              <input
+  <input
+    type="text"
+    placeholder="Maximum Budget"
+    className="input-style"
+    value={formData.budget_max || ""}
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        budget_max: formatCurrency(e.target.value)
+      })
+    }
+  />
 
-                type="text"
-
-                placeholder="Minimum Budget"
-
-                className="input-style"
-
-                value={formData.budget_min || ""}
-
-                onChange={(e)=>
-
-                  setFormData({
-
-                    ...formData,
-
-                    budget_min:formatCurrency(e.target.value)
-
-                  })
-
-                }
-
-              />
-
-
-
-
-
-
-              <input
-
-                type="text"
-
-                placeholder="Maximum Budget"
-
-                className="input-style"
-
-                value={formData.budget_max || ""}
-
-                onChange={(e)=>
-
-                  setFormData({
-
-                    ...formData,
-
-                    budget_max:formatCurrency(e.target.value)
-
-                  })
-
-                }
-
-              />
-
-
-
-            </div>
-
-
-
-
+</div>
 
 
 
@@ -924,7 +891,7 @@ export default function Consultation() {
             </h4>
 
 
-
+</div>
 
 
             <textarea
