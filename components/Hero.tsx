@@ -83,7 +83,7 @@ export default function Hero() {
         onCanPlay={() => setVideoReady(true)}
       >
         <source
-          src="/videos/Hero-mobile.mp4"
+         src="/videos/Hero-mobile-optimized.mp4"
           type="video/mp4"
         />
       </video>
