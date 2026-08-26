@@ -2,10 +2,10 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 w-full z-50 bg-black/40 backdrop-blur-md text-white px-8 py-5 flex justify-between items-center">
 
-      <h2 className="text-2xl font-semibold tracking-wide">
-        Dee
+    <h2>
+
         <span className="ml-2 text-sm font-normal text-gray-400">
-          | Land Rover Novi
+          Land Rover Novi
         </span>
       </h2>
 
