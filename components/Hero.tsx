@@ -100,14 +100,8 @@ export default function Hero() {
         <div className="absolute top-5 left-1/2 z-20 w-[calc(100%-40px)] max-w-md -translate-x-1/2">
           <div className="rounded-2xl border border-white/15 bg-black/70 px-5 py-4 text-center shadow-2xl backdrop-blur-md">
             <p className="text-sm font-medium text-white">
-              Experience the full presentation
-            </p>
-
-            <p className="mt-1 text-xs leading-relaxed text-gray-300">
-              Open this page in your browser to view the
-              full background video.
-            </p>
-
+    
+ </p>
             <p className="mt-3 text-xs text-yellow-500">
               Tap ••• in TikTok, then choose
               <span className="font-semibold">
@@ -117,6 +111,7 @@ export default function Hero() {
           </div>
         </div>
       )}
+
 
       {/* Hero Content */}
       <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-6 pt-20 text-center">
