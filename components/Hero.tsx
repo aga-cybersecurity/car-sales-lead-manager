@@ -108,6 +108,7 @@ export default function Hero() {
           loop
           playsInline
           preload="auto"
+          controls
           poster="/images/dunia1.jpeg"
           aria-hidden="true"
           className="absolute inset-0 z-0 h-full w-full object-cover object-[center_40%]"
