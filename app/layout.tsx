@@ -32,9 +32,9 @@ export default function RootLayout({
       <body
         className={`${cormorant.variable} ${inter.variable} antialiased`}
       >
-        <TikTokBrowserGuard>
+      
           {children}
-        </TikTokBrowserGuard>
+        
       </body>
     </html>
   );
