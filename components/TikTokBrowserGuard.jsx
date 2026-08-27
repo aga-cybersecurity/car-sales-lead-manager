@@ -9,10 +9,7 @@ export default function TikTokBrowserGuard({ children }) {
   useEffect(() => {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
-    const tikTok =
-      /TikTok/i.test(userAgent) ||
-      /musical_ly/i.test(userAgent) ||
-      /BytedanceWebview/i.test(userAgent);
+  const tikTok = true;
 
     setIsTikTok(tikTok);
     setChecked(true);

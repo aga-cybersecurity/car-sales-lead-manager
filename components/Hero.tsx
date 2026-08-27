@@ -19,7 +19,6 @@ export default function Hero() {
     // TikTok gets the image + browser prompt.
     if (isTikTok) return;
 
-    // Instagram and normal browsers keep the video.
     const video = videoRef.current;
 
     if (!video) return;
@@ -32,13 +31,15 @@ export default function Hero() {
       try {
         await video.play();
       } catch {
-        // Browser blocked autoplay.
-        // Poster image remains available.
+        // Autoplay was blocked.
+        // We will try again after user interaction.
       }
     };
 
+    // Initial attempt
     tryPlayVideo();
 
+    // Try again when video becomes ready
     const handleCanPlay = () => {
       tryPlayVideo();
     };
@@ -47,12 +48,41 @@ export default function Hero() {
       tryPlayVideo();
     };
 
+    const handleLoadedMetadata = () => {
+      tryPlayVideo();
+    };
+
     video.addEventListener("canplay", handleCanPlay);
     video.addEventListener("loadeddata", handleLoadedData);
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+
+    // Try again after the user interacts with the page.
+    const handleUserInteraction = () => {
+      tryPlayVideo();
+    };
+
+    window.addEventListener("touchstart", handleUserInteraction, {
+      once: true,
+      passive: true,
+    });
+
+    window.addEventListener("click", handleUserInteraction, {
+      once: true,
+    });
+
+    window.addEventListener("scroll", handleUserInteraction, {
+      once: true,
+      passive: true,
+    });
 
     return () => {
       video.removeEventListener("canplay", handleCanPlay);
       video.removeEventListener("loadeddata", handleLoadedData);
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+
+      window.removeEventListener("touchstart", handleUserInteraction);
+      window.removeEventListener("click", handleUserInteraction);
+      window.removeEventListener("scroll", handleUserInteraction);
     };
   }, []);
 
@@ -95,17 +125,16 @@ export default function Hero() {
       {/* Bottom Blend */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-48 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
-     {/* TikTok Browser Message */}
-{isTikTokBrowser && (
-  <div className="absolute bottom-28 left-1/2 z-50 w-[calc(100%-40px)] max-w-md -translate-x-1/2">
-    <div className="rounded-2xl border border-white/15 bg-black/80 px-5 py-4 text-center shadow-2xl backdrop-blur-md">
-      <p className="text-sm font-medium text-yellow-500">
-        Tap ••• in TikTok, then choose Open in Browser
-      </p>
-    </div>
-  </div>
-)}
-
+      {/* TikTok Browser Message */}
+      {isTikTokBrowser && (
+        <div className="absolute bottom-28 left-1/2 z-50 w-[calc(100%-40px)] max-w-md -translate-x-1/2">
+          <div className="rounded-2xl border border-white/15 bg-black/80 px-5 py-4 text-center shadow-2xl backdrop-blur-md">
+            <p className="text-sm font-medium text-yellow-500">
+              Tap ••• in TikTok, then choose Open in Browser
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Hero Content */}
       <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-6 pt-20 text-center">
