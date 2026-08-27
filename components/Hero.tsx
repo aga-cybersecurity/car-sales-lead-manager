@@ -96,21 +96,16 @@ export default function Hero() {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-48 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
       {/* TikTok Browser Message */}
-      {isTikTokBrowser && (
-        <div className="absolute top-5 left-1/2 z-20 w-[calc(100%-40px)] max-w-md -translate-x-1/2">
-          <div className="rounded-2xl border border-white/15 bg-black/70 px-5 py-4 text-center shadow-2xl backdrop-blur-md">
-            <p className="text-sm font-medium text-white">
-    
- </p>
-            <p className="mt-3 text-xs text-yellow-500">
-              Tap ••• in TikTok, then choose
-              <span className="font-semibold">
-                {" "}Open in Browser
-              </span>
-            </p>
-          </div>
-        </div>
-      )}
+      {/* TikTok Browser Message */}
+{isTikTokBrowser && (
+  <div className="absolute top-5 left-1/2 z-20 w-[calc(100%-40px)] max-w-md -translate-x-1/2">
+    <div className="rounded-2xl border border-white/15 bg-black/70 px-5 py-4 text-center shadow-2xl backdrop-blur-md">
+      <p className="text-sm font-medium text-yellow-500">
+        Tap ••• in TikTok, then choose Open in Browser
+      </p>
+    </div>
+  </div>
+)}
 
 
       {/* Hero Content */}
