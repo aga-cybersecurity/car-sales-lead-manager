@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
+import TikTokBrowserGuard from "../components/TikTokBrowserGuard";
+
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -30,7 +32,9 @@ export default function RootLayout({
       <body
         className={`${cormorant.variable} ${inter.variable} antialiased`}
       >
-        {children}
+        <TikTokBrowserGuard>
+          {children}
+        </TikTokBrowserGuard>
       </body>
     </html>
   );
