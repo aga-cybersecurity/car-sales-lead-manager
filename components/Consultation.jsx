@@ -14,27 +14,22 @@ export default function Consultation() {
     phone: "",
     email: "",
 
-    // Vehicle Interest
     make_model: "",
     year: "",
     trim: "",
     stock_number: "",
     vin: "",
 
-    // Factory Order
     factory_order: "",
 
-    // Trade-In
     trade_year: "",
     trade_model: "",
     trade_miles: "",
     trade_vin: "",
 
-    // Budget
     budget_min: "",
     budget_max: "",
 
-    // Notes
     notes: "",
   });
 
@@ -43,7 +38,7 @@ export default function Consultation() {
   // -----------------------------
 
   function formatPhone(value) {
-    const numbers = value.replace(/\D/g, "");
+    const numbers = value.replace(/\D/g, "").slice(0, 10);
 
     if (!numbers) return "";
 
@@ -58,7 +53,7 @@ export default function Consultation() {
     return `(${numbers.slice(0, 3)}) ${numbers.slice(
       3,
       6
-    )}-${numbers.slice(6, 10)}`;
+    )}-${numbers.slice(6)}`;
   }
 
   // -----------------------------
@@ -80,11 +75,10 @@ export default function Consultation() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Required fields
     if (
-      !formData.first_name ||
-      !formData.last_name ||
-      !formData.phone
+      !formData.first_name.trim() ||
+      !formData.last_name.trim() ||
+      !formData.phone.trim()
     ) {
       alert(
         "Please fill in First Name, Last Name, and Phone Number."
@@ -92,7 +86,6 @@ export default function Consultation() {
       return;
     }
 
-    // Email validation
     if (
       formData.email &&
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
@@ -103,200 +96,179 @@ export default function Consultation() {
 
     setSubmitting(true);
 
-    // -----------------------------
-    // CONVERT MILEAGE
-    // "45,000" → 45000
-    // -----------------------------
+    try {
+      // -----------------------------
+      // CONVERT MILEAGE
+      // -----------------------------
 
-    const mileage =
-      formData.trade_miles &&
-      formData.trade_miles
-        .toString()
-        .replace(/,/g, "")
-        .trim() !== ""
-        ? Number(
-            formData.trade_miles
-              .toString()
-              .replace(/,/g, "")
-              .trim()
-          )
+      const mileage =
+        formData.trade_miles &&
+        formData.trade_miles.toString().replace(/,/g, "").trim() !== ""
+          ? Number(
+              formData.trade_miles
+                .toString()
+                .replace(/,/g, "")
+                .trim()
+            )
+          : null;
+
+      // -----------------------------
+      // CONVERT BUDGET
+      // -----------------------------
+
+      const budgetMin = formData.budget_min
+        ? Number(formData.budget_min.replace(/\D/g, ""))
         : null;
 
-    // -----------------------------
-    // CONVERT BUDGET
-    // "$50,000" → 50000
-    // -----------------------------
+      const budgetMax = formData.budget_max
+        ? Number(formData.budget_max.replace(/\D/g, ""))
+        : null;
 
-    const budgetMin = formData.budget_min
-      ? Number(
-          formData.budget_min.replace(/\D/g, "")
-        )
-      : null;
+      // -----------------------------
+      // FINAL LEAD DATA
+      // -----------------------------
 
-    const budgetMax = formData.budget_max
-      ? Number(
-          formData.budget_max.replace(/\D/g, "")
-        )
-      : null;
+      const leadData = {
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+        phone: formData.phone,
+        email: formData.email.trim() || null,
 
-    // -----------------------------
-    // FINAL DATA SENT TO SUPABASE
-    // -----------------------------
+        make_model: formData.make_model.trim() || null,
+        year: formData.year.trim() || null,
+        trim: formData.trim.trim() || null,
+        stock_number: formData.stock_number.trim() || null,
+        vin: formData.vin.trim() || null,
 
-    const leadData = {
-      first_name: formData.first_name,
-      last_name: formData.last_name,
-      phone: formData.phone,
-      email: formData.email || null,
+        factory_order: formData.factory_order || null,
 
-      // Vehicle Interest
-      make_model: formData.make_model || null,
-      year: formData.year || null,
-      trim: formData.trim || null,
-      stock_number: formData.stock_number || null,
-      vin: formData.vin || null,
+        payment_method: payment || null,
 
-      // Factory Order
-      factory_order: formData.factory_order || null,
+        trade_in: tradeIn || null,
+        trade_year: formData.trade_year.trim() || null,
+        trade_model: formData.trade_model.trim() || null,
+        trade_miles: mileage,
+        trade_vin: formData.trade_vin.trim() || null,
 
-      // Purchase
-      payment_method: payment || null,
+        budget_min: budgetMin,
+        budget_max: budgetMax,
 
-      // Trade-In
-      trade_in: tradeIn || null,
-      trade_year: formData.trade_year || null,
-      trade_model: formData.trade_model || null,
-      trade_miles: mileage,
-      trade_vin: formData.trade_vin || null,
+        notes: formData.notes.trim() || null,
+      };
 
-      // Budget
-      budget_min: budgetMin,
-      budget_max: budgetMax,
+      console.log("FINAL LEAD DATA:", leadData);
 
-      // Notes
-      notes: formData.notes || null,
-    };
+      // -----------------------------
+      // SAVE LEAD TO SUPABASE
+      // -----------------------------
 
-    console.log("FINAL LEAD DATA:", leadData);
+      const { data: insertedLead, error: leadError } =
+        await supabase
+          .from("Leads")
+          .insert([leadData])
+          .select()
+          .single();
 
-    // -----------------------------
-    // INSERT INTO SUPABASE
-    // -----------------------------
+      if (leadError) {
+        console.error("SUPABASE ERROR:", leadError);
 
-   const { error } = await supabase
-  .from("Leads")
-  .insert([leadData]);
+        alert(
+          "There was a problem submitting your consultation request. Please try again."
+        );
 
-if (error) {
-  console.error("SUPABASE ERROR:", error);
-  alert(error.message);
-  setSubmitting(false);
-  return;
-}
+        return;
+      }
 
-// -----------------------------
-// SEND PUSH NOTIFICATION
-// -----------------------------
+      console.log("LEAD SAVED:", insertedLead);
 
-try {
-  const notificationResponse = await fetch(
-    "/api/subscribe/send-notification",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-      }),
-    }
-  );
+      // -----------------------------
+      // SEND PUSH NOTIFICATION
+      // -----------------------------
 
-  const notificationResult =
-    await notificationResponse.json();
+      try {
+        const notificationResponse = await fetch(
+          "/api/subscribe/send-notification",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              first_name: leadData.first_name,
+              last_name: leadData.last_name,
+            }),
+          }
+        );
 
-  if (!notificationResponse.ok) {
-    console.error(
-      "NOTIFICATION ERROR:",
-      notificationResult
-    );
-  } else {
-    console.log(
-      "NOTIFICATION SENT:",
-      notificationResult
-    );
-  }
-} catch (notificationError) {
-  console.error(
-    "NOTIFICATION REQUEST FAILED:",
-    notificationError
-  );
-}
+        const notificationResult =
+          await notificationResponse.json();
 
-// Send push notification
-try {
-  await fetch("/api/subscribe/send-notification", {
-  method: "POST",
+        if (!notificationResponse.ok) {
+          console.error(
+            "NOTIFICATION ERROR:",
+            notificationResult
+          );
+        } else {
+          console.log(
+            "NOTIFICATION SENT:",
+            notificationResult
+          );
+        }
+      } catch (notificationError) {
+        console.error(
+          "NOTIFICATION REQUEST FAILED:",
+          notificationError
+        );
+      }
 
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      first_name: leadData.first_name,
-      last_name: leadData.last_name,
-    }),
-  });
-} catch (notificationError) {
-  console.error(
-    "NOTIFICATION ERROR:",
-    notificationError
-  );
-}
-    if (error) {
-      console.error("SUPABASE ERROR:", error);
-      alert(error.message);
+      // -----------------------------
+      // SUCCESS
+      // -----------------------------
+
+      alert(
+        "Your consultation request has been submitted!"
+      );
+
+      // -----------------------------
+      // RESET FORM
+      // -----------------------------
+
+      setFormData({
+        first_name: "",
+        last_name: "",
+        phone: "",
+        email: "",
+
+        make_model: "",
+        year: "",
+        trim: "",
+        stock_number: "",
+        vin: "",
+
+        factory_order: "",
+
+        trade_year: "",
+        trade_model: "",
+        trade_miles: "",
+        trade_vin: "",
+
+        budget_min: "",
+        budget_max: "",
+
+        notes: "",
+      });
+
+      setPayment("");
+      setTradeIn("");
+    } catch (error) {
+      console.error("CONSULTATION SUBMIT ERROR:", error);
+
+      alert(
+        "Something went wrong. Please try again."
+      );
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    // -----------------------------
-    // SUCCESS
-    // -----------------------------
-
-    alert(
-      "Your consultation request has been submitted!"
-    );
-
-    // Reset form
-    setFormData({
-      first_name: "",
-      last_name: "",
-      phone: "",
-      email: "",
-
-      make_model: "",
-      year: "",
-      trim: "",
-      stock_number: "",
-      vin: "",
-
-      factory_order: "",
-
-      trade_year: "",
-      trade_model: "",
-      trade_miles: "",
-      trade_vin: "",
-
-      budget_min: "",
-      budget_max: "",
-
-      notes: "",
-    });
-
-    setPayment("");
-    setTradeIn("");
-    setSubmitting(false);
   }
 
   return (
@@ -306,9 +278,7 @@ try {
     >
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-14 items-start">
 
-        {/* ============================= */}
         {/* LEFT SIDE */}
-        {/* ============================= */}
 
         <div className="space-y-8">
 
@@ -343,10 +313,7 @@ try {
 
         </div>
 
-
-        {/* ============================= */}
         {/* RIGHT SIDE FORM */}
-        {/* ============================= */}
 
         <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-8 shadow-2xl">
 
@@ -359,9 +326,7 @@ try {
             className="space-y-6"
           >
 
-            {/* ============================= */}
             {/* BUYER INFORMATION */}
-            {/* ============================= */}
 
             <h4 className="text-yellow-500">
               Buyer Information
@@ -423,10 +388,7 @@ try {
               }
             />
 
-
-            {/* ============================= */}
             {/* VEHICLE INTEREST */}
-            {/* ============================= */}
 
             <h4 className="text-yellow-500 pt-4">
               Vehicle Interest
@@ -468,8 +430,6 @@ try {
                 Found a vehicle you love?
               </p>
 
-              {/* MAKE / MODEL */}
-
               <input
                 placeholder="Vehicle Make & Model"
                 className="input-style"
@@ -481,8 +441,6 @@ try {
                   })
                 }
               />
-
-              {/* YEAR */}
 
               <input
                 placeholder="Vehicle Year"
@@ -496,8 +454,6 @@ try {
                 }
               />
 
-              {/* TRIM */}
-
               <input
                 placeholder="Trim (Optional)"
                 className="input-style"
@@ -510,8 +466,6 @@ try {
                 }
               />
 
-              {/* STOCK NUMBER */}
-
               <input
                 placeholder="Stock Number (Optional)"
                 className="input-style"
@@ -523,8 +477,6 @@ try {
                   })
                 }
               />
-
-              {/* VEHICLE VIN */}
 
               <input
                 type="text"
@@ -544,10 +496,7 @@ try {
 
             </div>
 
-
-            {/* ============================= */}
             {/* FACTORY ORDER */}
-            {/* ============================= */}
 
             <p className="text-sm text-gray-400 mt-4">
               Interested in placing a factory order?
@@ -556,7 +505,6 @@ try {
             <div className="flex gap-3 flex-wrap">
 
               {["Yes", "No"].map((item) => (
-
                 <button
                   key={item}
                   type="button"
@@ -574,15 +522,11 @@ try {
                 >
                   {item}
                 </button>
-
               ))}
 
             </div>
 
-
-            {/* ============================= */}
             {/* PURCHASE DETAILS */}
-            {/* ============================= */}
 
             <h4 className="text-yellow-500 pt-4">
               Purchase Details
@@ -595,7 +539,6 @@ try {
             <div className="flex gap-3 flex-wrap">
 
               {["Cash", "Financing", "Lease"].map((item) => (
-
                 <button
                   key={item}
                   type="button"
@@ -608,15 +551,11 @@ try {
                 >
                   {item}
                 </button>
-
               ))}
 
             </div>
 
-
-            {/* ============================= */}
             {/* TRADE IN */}
-            {/* ============================= */}
 
             <p className="text-sm text-gray-400 mt-4">
               Trade-In Vehicle
@@ -625,7 +564,6 @@ try {
             <div className="flex gap-3 flex-wrap">
 
               {["Yes", "No"].map((item) => (
-
                 <button
                   key={item}
                   type="button"
@@ -638,19 +576,14 @@ try {
                 >
                   {item}
                 </button>
-
               ))}
 
             </div>
 
-
             {/* TRADE DETAILS */}
 
             {tradeIn === "Yes" && (
-
               <div className="space-y-4">
-
-                {/* TRADE YEAR */}
 
                 <input
                   placeholder="Trade-In Year"
@@ -664,8 +597,6 @@ try {
                   }
                 />
 
-                {/* TRADE MODEL */}
-
                 <input
                   placeholder="Trade-In Make & Model"
                   className="input-style"
@@ -678,8 +609,6 @@ try {
                   }
                 />
 
-                {/* TRADE MILEAGE */}
-
                 <input
                   type="text"
                   inputMode="numeric"
@@ -687,7 +616,6 @@ try {
                   className="input-style"
                   value={formData.trade_miles}
                   onChange={(e) => {
-
                     const numbers =
                       e.target.value.replace(/\D/g, "");
 
@@ -699,11 +627,8 @@ try {
                       ...formData,
                       trade_miles: formatted,
                     });
-
                   }}
                 />
-
-                {/* TRADE VIN */}
 
                 <input
                   type="text"
@@ -722,13 +647,9 @@ try {
                 />
 
               </div>
-
             )}
 
-
-            {/* ============================= */}
             {/* BUDGET */}
-            {/* ============================= */}
 
             <h4 className="text-yellow-500 pt-4">
               Budget
@@ -768,17 +689,14 @@ try {
 
             </div>
 
-
-            {/* ============================= */}
-            {/* ADDITIONAL NOTES */}
-            {/* ============================= */}
+            {/* NOTES */}
 
             <h4 className="text-yellow-500 pt-4">
               Additional Notes
             </h4>
 
             <textarea
-              rows="5"
+              rows={5}
               placeholder="Questions, special requests, or appointment scheduling details"
               className="input-style"
               value={formData.notes}
@@ -790,10 +708,7 @@ try {
               }
             />
 
-
-            {/* ============================= */}
             {/* CONSENT */}
-            {/* ============================= */}
 
             <label className="flex gap-3 text-sm text-gray-400">
 
@@ -808,10 +723,7 @@ try {
 
             </label>
 
-
-            {/* ============================= */}
             {/* SUBMIT */}
-            {/* ============================= */}
 
             <button
               type="submit"
