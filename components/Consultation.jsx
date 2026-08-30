@@ -226,55 +226,61 @@ export default function Consultation() {
     // SEND PUSH NOTIFICATION
     // -----------------------------
 
-    console.log(
-      "SENDING PUSH NOTIFICATION..."
-    );
+   // -----------------------------
+// SEND PUSH NOTIFICATION
+// -----------------------------
 
-    try {
-      const notificationResponse = await fetch(
-        "/api/subscribe/send-notification",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            first_name: leadData.first_name,
-            last_name: leadData.last_name,
-          }),
-        }
-      );
+console.log("=================================");
+console.log("STARTING PUSH NOTIFICATION");
+console.log("LEAD:", leadData.first_name, leadData.last_name);
 
-      const notificationResult =
-        await notificationResponse.json();
-
-      console.log(
-        "NOTIFICATION HTTP STATUS:",
-        notificationResponse.status
-      );
-
-      console.log(
-        "NOTIFICATION RESULT:",
-        notificationResult
-      );
-
-      if (!notificationResponse.ok) {
-        console.error(
-          "NOTIFICATION FAILED:",
-          notificationResult
-        );
-      } else {
-        console.log(
-          "PUSH NOTIFICATION SENT SUCCESSFULLY"
-        );
-      }
-    } catch (notificationError) {
-      console.error(
-        "NOTIFICATION REQUEST ERROR:",
-        notificationError
-      );
+try {
+  const notificationResponse = await fetch(
+    "/api/subscribe/send-notification",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        first_name: leadData.first_name,
+        last_name: leadData.last_name,
+      }),
     }
+  );
 
+  console.log(
+    "NOTIFICATION RESPONSE STATUS:",
+    notificationResponse.status
+  );
+
+  const notificationText =
+    await notificationResponse.text();
+
+  console.log(
+    "NOTIFICATION RESPONSE:",
+    notificationText
+  );
+
+  if (!notificationResponse.ok) {
+    console.error(
+      "PUSH NOTIFICATION FAILED"
+    );
+  } else {
+    console.log(
+      "PUSH NOTIFICATION API SUCCESS"
+    );
+  }
+
+} catch (error) {
+  console.error(
+    "PUSH NOTIFICATION FETCH ERROR:",
+    error
+  );
+}
+
+console.log("PUSH NOTIFICATION STEP FINISHED");
+console.log("=================================");
     console.log("=================================");
 
     // -----------------------------
