@@ -77,255 +77,260 @@ export default function Consultation() {
   // SUBMIT
   // -----------------------------
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  
+    async function handleSubmit(e) {
+  e.preventDefault();
+
+  // -----------------------------
+  // VALIDATE REQUIRED FIELDS
+  // -----------------------------
+
+  if (
+    !formData.first_name ||
+    !formData.last_name ||
+    !formData.phone
+  ) {
+    alert(
+      "Please fill in First Name, Last Name, and Phone Number."
+    );
+    return;
+  }
+
+  // -----------------------------
+  // EMAIL VALIDATION
+  // -----------------------------
+
+  if (
+    formData.email &&
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+  ) {
+    alert("Please enter a valid email address.");
+    return;
+  }
+
+  setSubmitting(true);
+
+  try {
+    // -----------------------------
+    // CONVERT MILEAGE
+    // -----------------------------
+
+    const mileage =
+      formData.trade_miles &&
+      formData.trade_miles
+        .toString()
+        .replace(/,/g, "")
+        .trim() !== ""
+        ? Number(
+            formData.trade_miles
+              .toString()
+              .replace(/,/g, "")
+              .trim()
+          )
+        : null;
 
     // -----------------------------
-    // VALIDATE REQUIRED FIELDS
+    // CONVERT BUDGET
     // -----------------------------
 
-    if (
-      !formData.first_name ||
-      !formData.last_name ||
-      !formData.phone
-    ) {
-      alert(
-        "Please fill in First Name, Last Name, and Phone Number."
+    const budgetMin = formData.budget_min
+      ? Number(formData.budget_min.replace(/\D/g, ""))
+      : null;
+
+    const budgetMax = formData.budget_max
+      ? Number(formData.budget_max.replace(/\D/g, ""))
+      : null;
+
+    // -----------------------------
+    // CREATE LEAD DATA
+    // -----------------------------
+
+    const leadData = {
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      phone: formData.phone,
+      email: formData.email || null,
+
+      make_model: formData.make_model || null,
+      year: formData.year || null,
+      trim: formData.trim || null,
+      stock_number: formData.stock_number || null,
+      vin: formData.vin || null,
+
+      factory_order: formData.factory_order || null,
+
+      payment_method: payment || null,
+
+      trade_in: tradeIn || null,
+      trade_year: formData.trade_year || null,
+      trade_model: formData.trade_model || null,
+      trade_miles: mileage,
+      trade_vin: formData.trade_vin || null,
+
+      budget_min: budgetMin,
+      budget_max: budgetMax,
+
+      notes: formData.notes || null,
+    };
+
+    // -----------------------------
+    // DEBUG
+    // -----------------------------
+
+    console.log("=================================");
+    console.log("SUBMITTING LEAD");
+    console.log("FINAL LEAD DATA:", leadData);
+    console.log("STARTING LEAD INSERT...");
+
+    // -----------------------------
+    // SAVE LEAD TO SUPABASE
+    // -----------------------------
+
+    const {
+      data: savedLead,
+      error: leadError,
+    } = await supabase
+      .from("Leads")
+      .insert([leadData])
+      .select()
+      .single();
+
+    console.log(
+      "LEAD INSERT FINISHED:",
+      leadError
+    );
+
+    // -----------------------------
+    // CHECK SUPABASE
+    // -----------------------------
+
+    if (leadError) {
+      console.error(
+        "SUPABASE LEAD ERROR:",
+        leadError
       );
+
+      alert(
+        "There was a problem submitting your consultation. Please try again."
+      );
+
       return;
     }
 
+    console.log(
+      "LEAD SUCCESSFULLY SAVED:",
+      savedLead
+    );
+
     // -----------------------------
-    // EMAIL VALIDATION
+    // SEND PUSH NOTIFICATION
     // -----------------------------
 
-    if (
-      formData.email &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
-    ) {
-      alert("Please enter a valid email address.");
-      return;
-    }
-
-    setSubmitting(true);
+    console.log(
+      "SENDING PUSH NOTIFICATION..."
+    );
 
     try {
-      // -----------------------------
-      // CONVERT MILEAGE
-      // "45,000" → 45000
-      // -----------------------------
+      const notificationResponse = await fetch(
+        "/api/subscribe/send-notification",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            first_name: leadData.first_name,
+            last_name: leadData.last_name,
+          }),
+        }
+      );
 
-      const mileage =
-        formData.trade_miles &&
-        formData.trade_miles
-          .toString()
-          .replace(/,/g, "")
-          .trim() !== ""
-          ? Number(
-              formData.trade_miles
-                .toString()
-                .replace(/,/g, "")
-                .trim()
-            )
-          : null;
+      const notificationResult =
+        await notificationResponse.json();
 
-      // -----------------------------
-      // CONVERT BUDGET
-      // "$50,000" → 50000
-      // -----------------------------
+      console.log(
+        "NOTIFICATION HTTP STATUS:",
+        notificationResponse.status
+      );
 
-      const budgetMin = formData.budget_min
-        ? Number(
-            formData.budget_min.replace(/\D/g, "")
-          )
-        : null;
+      console.log(
+        "NOTIFICATION RESULT:",
+        notificationResult
+      );
 
-      const budgetMax = formData.budget_max
-        ? Number(
-            formData.budget_max.replace(/\D/g, "")
-          )
-        : null;
-
-      // -----------------------------
-      // FINAL LEAD DATA
-      // -----------------------------
-
-      const leadData = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        phone: formData.phone,
-        email: formData.email || null,
-
-        // Vehicle Interest
-        make_model: formData.make_model || null,
-        year: formData.year || null,
-        trim: formData.trim || null,
-        stock_number: formData.stock_number || null,
-        vin: formData.vin || null,
-
-        // Factory Order
-        factory_order: formData.factory_order || null,
-
-        // Purchase
-        payment_method: payment || null,
-
-        // Trade-In
-        trade_in: tradeIn || null,
-        trade_year: formData.trade_year || null,
-        trade_model: formData.trade_model || null,
-        trade_miles: mileage,
-        trade_vin: formData.trade_vin || null,
-
-        // Budget
-        budget_min: budgetMin,
-        budget_max: budgetMax,
-
-        // Notes
-        notes: formData.notes || null,
-      };
-
-      console.log("=================================");
-      console.log("SUBMITTING LEAD");
-      console.log("LEAD DATA:", leadData);
-      console.log("=================================");
-
-      // -----------------------------
-      // 1. SAVE LEAD TO SUPABASE
-      // -----------------------------
-
-      const { data: savedLead, error: leadError } =
-        await supabase
-          .from("Leads")
-          .insert([leadData])
-          .select()
-          .single();
-
-      if (leadError) {
+      if (!notificationResponse.ok) {
         console.error(
-          "SUPABASE LEAD ERROR:",
-          leadError
-        );
-
-        alert(
-          "There was a problem submitting your consultation. Please try again."
-        );
-
-        return;
-      }
-
-      console.log(
-        "LEAD SUCCESSFULLY SAVED:",
-        savedLead
-      );
-
-      // -----------------------------
-      // 2. SEND PUSH NOTIFICATION
-      // -----------------------------
-
-      console.log(
-        "SENDING PUSH NOTIFICATION..."
-      );
-
-      try {
-        const notificationResponse =
-          await fetch(
-            "/api/subscribe/send-notification",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                first_name:
-                  formData.first_name,
-                last_name:
-                  formData.last_name,
-              }),
-            }
-          );
-
-        const notificationResult =
-          await notificationResponse.json();
-
-        console.log(
-          "NOTIFICATION HTTP STATUS:",
-          notificationResponse.status
-        );
-
-        console.log(
-          "NOTIFICATION RESULT:",
+          "NOTIFICATION FAILED:",
           notificationResult
         );
-
-        if (!notificationResponse.ok) {
-          console.error(
-            "NOTIFICATION FAILED:",
-            notificationResult
-          );
-        } else {
-          console.log(
-            "PUSH NOTIFICATION REQUEST SUCCESSFUL!"
-          );
-        }
-      } catch (notificationError) {
-        console.error(
-          "NOTIFICATION REQUEST ERROR:",
-          notificationError
+      } else {
+        console.log(
+          "PUSH NOTIFICATION SENT SUCCESSFULLY"
         );
       }
-
-      // -----------------------------
-      // 3. SUCCESS MESSAGE
-      // -----------------------------
-
-      alert(
-        "Your consultation request has been submitted!"
-      );
-
-      // -----------------------------
-      // 4. RESET FORM
-      // -----------------------------
-
-      setFormData({
-        first_name: "",
-        last_name: "",
-        phone: "",
-        email: "",
-
-        make_model: "",
-        year: "",
-        trim: "",
-        stock_number: "",
-        vin: "",
-
-        factory_order: "",
-
-        trade_year: "",
-        trade_model: "",
-        trade_miles: "",
-        trade_vin: "",
-
-        budget_min: "",
-        budget_max: "",
-
-        notes: "",
-      });
-
-      setPayment("");
-      setTradeIn("");
-    } catch (error) {
+    } catch (notificationError) {
       console.error(
-        "CONSULTATION SUBMISSION ERROR:",
-        error
+        "NOTIFICATION REQUEST ERROR:",
+        notificationError
       );
-
-      alert(
-        "Something went wrong. Please try again."
-      );
-    } finally {
-      setSubmitting(false);
     }
+
+    console.log("=================================");
+
+    // -----------------------------
+    // SUCCESS
+    // -----------------------------
+
+    alert(
+      "Your consultation request has been submitted!"
+    );
+
+    // -----------------------------
+    // RESET FORM
+    // -----------------------------
+
+    setFormData({
+      first_name: "",
+      last_name: "",
+      phone: "",
+      email: "",
+
+      make_model: "",
+      year: "",
+      trim: "",
+      stock_number: "",
+      vin: "",
+
+      factory_order: "",
+
+      trade_year: "",
+      trade_model: "",
+      trade_miles: "",
+      trade_vin: "",
+
+      budget_min: "",
+      budget_max: "",
+
+      notes: "",
+    });
+
+    setPayment("");
+    setTradeIn("");
+
+  } catch (error) {
+    console.error(
+      "CONSULTATION SUBMISSION ERROR:",
+      error
+    );
+
+    alert(
+      "Something went wrong. Please try again."
+    );
+
+  } finally {
+    setSubmitting(false);
   }
+}
 
   return (
     <section
