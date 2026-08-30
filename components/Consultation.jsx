@@ -183,10 +183,76 @@ export default function Consultation() {
     // INSERT INTO SUPABASE
     // -----------------------------
 
-    const { error } = await supabase
-      .from("Leads")
-      .insert([leadData]);
+   const { error } = await supabase
+  .from("Leads")
+  .insert([leadData]);
 
+if (error) {
+  console.error("SUPABASE ERROR:", error);
+  alert(error.message);
+  setSubmitting(false);
+  return;
+}
+
+// -----------------------------
+// SEND PUSH NOTIFICATION
+// -----------------------------
+
+try {
+  const notificationResponse = await fetch(
+    "/api/subscribe/send-notification",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+      }),
+    }
+  );
+
+  const notificationResult =
+    await notificationResponse.json();
+
+  if (!notificationResponse.ok) {
+    console.error(
+      "NOTIFICATION ERROR:",
+      notificationResult
+    );
+  } else {
+    console.log(
+      "NOTIFICATION SENT:",
+      notificationResult
+    );
+  }
+} catch (notificationError) {
+  console.error(
+    "NOTIFICATION REQUEST FAILED:",
+    notificationError
+  );
+}
+
+// Send push notification
+try {
+  await fetch("/api/subscribe/send-notification", {
+  method: "POST",
+
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      first_name: leadData.first_name,
+      last_name: leadData.last_name,
+    }),
+  });
+} catch (notificationError) {
+  console.error(
+    "NOTIFICATION ERROR:",
+    notificationError
+  );
+}
     if (error) {
       console.error("SUPABASE ERROR:", error);
       alert(error.message);
