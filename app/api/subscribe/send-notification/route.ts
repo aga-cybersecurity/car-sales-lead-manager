@@ -4,7 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 
-export async function POST(request) {
+export async function POST(request: Request) {
+  
   try {
     const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
     const privateKey = process.env.VAPID_PRIVATE_KEY;
@@ -39,8 +40,9 @@ export async function POST(request) {
     const firstName = body.first_name || "Someone";
     const lastName = body.last_name || "";
 
-    const message = `${firstName} ${lastName}`.trim()
-      + " submitted a new consultation request.";
+    const message =
+      `${firstName} ${lastName}`.trim() +
+      " submitted a new consultation request.";
 
     const supabaseAdmin = createClient(
       supabaseUrl,
@@ -60,7 +62,8 @@ export async function POST(request) {
 
       return NextResponse.json(
         {
-          error: "Could not retrieve push subscriptions.",
+          error:
+            "Could not retrieve push subscriptions.",
         },
         { status: 500 }
       );
@@ -69,7 +72,8 @@ export async function POST(request) {
     if (!subscriptions || subscriptions.length === 0) {
       return NextResponse.json({
         success: true,
-        message: "No notification subscriptions found.",
+        message:
+          "No notification subscriptions found.",
       });
     }
 
@@ -115,7 +119,6 @@ export async function POST(request) {
       success: true,
       results,
     });
-
   } catch (error) {
     console.error(
       "PUSH NOTIFICATION ERROR:",
