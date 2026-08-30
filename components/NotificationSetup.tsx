@@ -62,11 +62,13 @@ export default function NotificationSetup() {
       }
 
       // Save subscription
+      console.log("SUBSCRIPTION BEING SENT:", subscription);
       const response = await fetch(
   "/api/subscribe/save-subscription",
-  
-        {
-          method: "POST",
+  {
+    method: "POST",
+
+
           headers: {
             "Content-Type": "application/json",
           },
@@ -87,8 +89,11 @@ export default function NotificationSetup() {
       console.error("NOTIFICATION SETUP ERROR:", error);
 
       setStatus(
-        "Unable to enable notifications. Please try again."
-      );
+  error instanceof Error
+    ? error.message
+    : "Unable to enable notifications. Please try again."
+);
+
     } finally {
       setLoading(false);
     }
