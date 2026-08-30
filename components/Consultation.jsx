@@ -14,22 +14,27 @@ export default function Consultation() {
     phone: "",
     email: "",
 
+    // Vehicle Interest
     make_model: "",
     year: "",
     trim: "",
     stock_number: "",
     vin: "",
 
+    // Factory Order
     factory_order: "",
 
+    // Trade-In
     trade_year: "",
     trade_model: "",
     trade_miles: "",
     trade_vin: "",
 
+    // Budget
     budget_min: "",
     budget_max: "",
 
+    // Notes
     notes: "",
   });
 
@@ -38,7 +43,7 @@ export default function Consultation() {
   // -----------------------------
 
   function formatPhone(value) {
-    const numbers = value.replace(/\D/g, "").slice(0, 10);
+    const numbers = value.replace(/\D/g, "");
 
     if (!numbers) return "";
 
@@ -53,7 +58,7 @@ export default function Consultation() {
     return `(${numbers.slice(0, 3)}) ${numbers.slice(
       3,
       6
-    )}-${numbers.slice(6)}`;
+    )}-${numbers.slice(6, 10)}`;
   }
 
   // -----------------------------
@@ -75,16 +80,24 @@ export default function Consultation() {
   async function handleSubmit(e) {
     e.preventDefault();
 
+    // -----------------------------
+    // VALIDATE REQUIRED FIELDS
+    // -----------------------------
+
     if (
-      !formData.first_name.trim() ||
-      !formData.last_name.trim() ||
-      !formData.phone.trim()
+      !formData.first_name ||
+      !formData.last_name ||
+      !formData.phone
     ) {
       alert(
         "Please fill in First Name, Last Name, and Phone Number."
       );
       return;
     }
+
+    // -----------------------------
+    // EMAIL VALIDATION
+    // -----------------------------
 
     if (
       formData.email &&
@@ -99,11 +112,15 @@ export default function Consultation() {
     try {
       // -----------------------------
       // CONVERT MILEAGE
+      // "45,000" → 45000
       // -----------------------------
 
       const mileage =
         formData.trade_miles &&
-        formData.trade_miles.toString().replace(/,/g, "").trim() !== ""
+        formData.trade_miles
+          .toString()
+          .replace(/,/g, "")
+          .trim() !== ""
           ? Number(
               formData.trade_miles
                 .toString()
@@ -114,14 +131,19 @@ export default function Consultation() {
 
       // -----------------------------
       // CONVERT BUDGET
+      // "$50,000" → 50000
       // -----------------------------
 
       const budgetMin = formData.budget_min
-        ? Number(formData.budget_min.replace(/\D/g, ""))
+        ? Number(
+            formData.budget_min.replace(/\D/g, "")
+          )
         : null;
 
       const budgetMax = formData.budget_max
-        ? Number(formData.budget_max.replace(/\D/g, ""))
+        ? Number(
+            formData.budget_max.replace(/\D/g, "")
+          )
         : null;
 
       // -----------------------------
@@ -129,40 +151,49 @@ export default function Consultation() {
       // -----------------------------
 
       const leadData = {
-        first_name: formData.first_name.trim(),
-        last_name: formData.last_name.trim(),
+        first_name: formData.first_name,
+        last_name: formData.last_name,
         phone: formData.phone,
-        email: formData.email.trim() || null,
+        email: formData.email || null,
 
-        make_model: formData.make_model.trim() || null,
-        year: formData.year.trim() || null,
-        trim: formData.trim.trim() || null,
-        stock_number: formData.stock_number.trim() || null,
-        vin: formData.vin.trim() || null,
+        // Vehicle Interest
+        make_model: formData.make_model || null,
+        year: formData.year || null,
+        trim: formData.trim || null,
+        stock_number: formData.stock_number || null,
+        vin: formData.vin || null,
 
+        // Factory Order
         factory_order: formData.factory_order || null,
 
+        // Purchase
         payment_method: payment || null,
 
+        // Trade-In
         trade_in: tradeIn || null,
-        trade_year: formData.trade_year.trim() || null,
-        trade_model: formData.trade_model.trim() || null,
+        trade_year: formData.trade_year || null,
+        trade_model: formData.trade_model || null,
         trade_miles: mileage,
-        trade_vin: formData.trade_vin.trim() || null,
+        trade_vin: formData.trade_vin || null,
 
+        // Budget
         budget_min: budgetMin,
         budget_max: budgetMax,
 
-        notes: formData.notes.trim() || null,
+        // Notes
+        notes: formData.notes || null,
       };
 
-      console.log("FINAL LEAD DATA:", leadData);
+      console.log("=================================");
+      console.log("SUBMITTING LEAD");
+      console.log("LEAD DATA:", leadData);
+      console.log("=================================");
 
       // -----------------------------
-      // SAVE LEAD TO SUPABASE
+      // 1. SAVE LEAD TO SUPABASE
       // -----------------------------
 
-      const { data: insertedLead, error: leadError } =
+      const { data: savedLead, error: leadError } =
         await supabase
           .from("Leads")
           .insert([leadData])
@@ -170,59 +201,81 @@ export default function Consultation() {
           .single();
 
       if (leadError) {
-        console.error("SUPABASE ERROR:", leadError);
+        console.error(
+          "SUPABASE LEAD ERROR:",
+          leadError
+        );
 
         alert(
-          "There was a problem submitting your consultation request. Please try again."
+          "There was a problem submitting your consultation. Please try again."
         );
 
         return;
       }
 
-      console.log("LEAD SAVED:", insertedLead);
+      console.log(
+        "LEAD SUCCESSFULLY SAVED:",
+        savedLead
+      );
 
       // -----------------------------
-      // SEND PUSH NOTIFICATION
+      // 2. SEND PUSH NOTIFICATION
       // -----------------------------
+
+      console.log(
+        "SENDING PUSH NOTIFICATION..."
+      );
 
       try {
-        const notificationResponse = await fetch(
-          "/api/subscribe/send-notification",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              first_name: leadData.first_name,
-              last_name: leadData.last_name,
-            }),
-          }
-        );
+        const notificationResponse =
+          await fetch(
+            "/api/subscribe/send-notification",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                first_name:
+                  formData.first_name,
+                last_name:
+                  formData.last_name,
+              }),
+            }
+          );
 
         const notificationResult =
           await notificationResponse.json();
 
+        console.log(
+          "NOTIFICATION HTTP STATUS:",
+          notificationResponse.status
+        );
+
+        console.log(
+          "NOTIFICATION RESULT:",
+          notificationResult
+        );
+
         if (!notificationResponse.ok) {
           console.error(
-            "NOTIFICATION ERROR:",
+            "NOTIFICATION FAILED:",
             notificationResult
           );
         } else {
           console.log(
-            "NOTIFICATION SENT:",
-            notificationResult
+            "PUSH NOTIFICATION REQUEST SUCCESSFUL!"
           );
         }
       } catch (notificationError) {
         console.error(
-          "NOTIFICATION REQUEST FAILED:",
+          "NOTIFICATION REQUEST ERROR:",
           notificationError
         );
       }
 
       // -----------------------------
-      // SUCCESS
+      // 3. SUCCESS MESSAGE
       // -----------------------------
 
       alert(
@@ -230,7 +283,7 @@ export default function Consultation() {
       );
 
       // -----------------------------
-      // RESET FORM
+      // 4. RESET FORM
       // -----------------------------
 
       setFormData({
@@ -261,7 +314,10 @@ export default function Consultation() {
       setPayment("");
       setTradeIn("");
     } catch (error) {
-      console.error("CONSULTATION SUBMIT ERROR:", error);
+      console.error(
+        "CONSULTATION SUBMISSION ERROR:",
+        error
+      );
 
       alert(
         "Something went wrong. Please try again."
@@ -278,7 +334,9 @@ export default function Consultation() {
     >
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-14 items-start">
 
+        {/* ============================= */}
         {/* LEFT SIDE */}
+        {/* ============================= */}
 
         <div className="space-y-8">
 
@@ -313,7 +371,9 @@ export default function Consultation() {
 
         </div>
 
+        {/* ============================= */}
         {/* RIGHT SIDE FORM */}
+        {/* ============================= */}
 
         <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-8 shadow-2xl">
 
@@ -326,7 +386,9 @@ export default function Consultation() {
             className="space-y-6"
           >
 
+            {/* ============================= */}
             {/* BUYER INFORMATION */}
+            {/* ============================= */}
 
             <h4 className="text-yellow-500">
               Buyer Information
@@ -370,7 +432,9 @@ export default function Consultation() {
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  phone: formatPhone(e.target.value),
+                  phone: formatPhone(
+                    e.target.value
+                  ),
                 })
               }
             />
@@ -388,7 +452,9 @@ export default function Consultation() {
               }
             />
 
+            {/* ============================= */}
             {/* VEHICLE INTEREST */}
+            {/* ============================= */}
 
             <h4 className="text-yellow-500 pt-4">
               Vehicle Interest
@@ -489,14 +555,19 @@ export default function Consultation() {
                     ...formData,
                     vin: e.target.value
                       .toUpperCase()
-                      .replace(/[^A-Z0-9]/g, ""),
+                      .replace(
+                        /[^A-Z0-9]/g,
+                        ""
+                      ),
                   })
                 }
               />
 
             </div>
 
+            {/* ============================= */}
             {/* FACTORY ORDER */}
+            {/* ============================= */}
 
             <p className="text-sm text-gray-400 mt-4">
               Interested in placing a factory order?
@@ -505,6 +576,7 @@ export default function Consultation() {
             <div className="flex gap-3 flex-wrap">
 
               {["Yes", "No"].map((item) => (
+
                 <button
                   key={item}
                   type="button"
@@ -522,11 +594,14 @@ export default function Consultation() {
                 >
                   {item}
                 </button>
+
               ))}
 
             </div>
 
+            {/* ============================= */}
             {/* PURCHASE DETAILS */}
+            {/* ============================= */}
 
             <h4 className="text-yellow-500 pt-4">
               Purchase Details
@@ -538,24 +613,32 @@ export default function Consultation() {
 
             <div className="flex gap-3 flex-wrap">
 
-              {["Cash", "Financing", "Lease"].map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setPayment(item)}
-                  className={`px-5 py-3 rounded-xl border transition cursor-pointer ${
-                    payment === item
-                      ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
-                      : "border-zinc-700 text-gray-300 hover:border-yellow-500"
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
+              {["Cash", "Financing", "Lease"].map(
+                (item) => (
+
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() =>
+                      setPayment(item)
+                    }
+                    className={`px-5 py-3 rounded-xl border transition cursor-pointer ${
+                      payment === item
+                        ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
+                        : "border-zinc-700 text-gray-300 hover:border-yellow-500"
+                    }`}
+                  >
+                    {item}
+                  </button>
+
+                )
+              )}
 
             </div>
 
+            {/* ============================= */}
             {/* TRADE IN */}
+            {/* ============================= */}
 
             <p className="text-sm text-gray-400 mt-4">
               Trade-In Vehicle
@@ -564,10 +647,13 @@ export default function Consultation() {
             <div className="flex gap-3 flex-wrap">
 
               {["Yes", "No"].map((item) => (
+
                 <button
                   key={item}
                   type="button"
-                  onClick={() => setTradeIn(item)}
+                  onClick={() =>
+                    setTradeIn(item)
+                  }
                   className={`px-5 py-3 rounded-xl border transition cursor-pointer ${
                     tradeIn === item
                       ? "border-yellow-500 text-yellow-500 bg-yellow-500/10"
@@ -576,13 +662,17 @@ export default function Consultation() {
                 >
                   {item}
                 </button>
+
               ))}
 
             </div>
 
+            {/* ============================= */}
             {/* TRADE DETAILS */}
+            {/* ============================= */}
 
             {tradeIn === "Yes" && (
+
               <div className="space-y-4">
 
                 <input
@@ -592,7 +682,8 @@ export default function Consultation() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      trade_year: e.target.value,
+                      trade_year:
+                        e.target.value,
                     })
                   }
                 />
@@ -604,7 +695,8 @@ export default function Consultation() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      trade_model: e.target.value,
+                      trade_model:
+                        e.target.value,
                     })
                   }
                 />
@@ -616,17 +708,25 @@ export default function Consultation() {
                   className="input-style"
                   value={formData.trade_miles}
                   onChange={(e) => {
+
                     const numbers =
-                      e.target.value.replace(/\D/g, "");
+                      e.target.value.replace(
+                        /\D/g,
+                        ""
+                      );
 
                     const formatted = numbers
-                      ? Number(numbers).toLocaleString()
+                      ? Number(
+                          numbers
+                        ).toLocaleString()
                       : "";
 
                     setFormData({
                       ...formData,
-                      trade_miles: formatted,
+                      trade_miles:
+                        formatted,
                     });
+
                   }}
                 />
 
@@ -639,17 +739,24 @@ export default function Consultation() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      trade_vin: e.target.value
-                        .toUpperCase()
-                        .replace(/[^A-Z0-9]/g, ""),
+                      trade_vin:
+                        e.target.value
+                          .toUpperCase()
+                          .replace(
+                            /[^A-Z0-9]/g,
+                            ""
+                          ),
                     })
                   }
                 />
 
               </div>
+
             )}
 
+            {/* ============================= */}
             {/* BUDGET */}
+            {/* ============================= */}
 
             <h4 className="text-yellow-500 pt-4">
               Budget
@@ -665,9 +772,10 @@ export default function Consultation() {
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    budget_min: formatCurrency(
-                      e.target.value
-                    ),
+                    budget_min:
+                      formatCurrency(
+                        e.target.value
+                      ),
                   })
                 }
               />
@@ -680,23 +788,26 @@ export default function Consultation() {
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    budget_max: formatCurrency(
-                      e.target.value
-                    ),
+                    budget_max:
+                      formatCurrency(
+                        e.target.value
+                      ),
                   })
                 }
               />
 
             </div>
 
-            {/* NOTES */}
+            {/* ============================= */}
+            {/* ADDITIONAL NOTES */}
+            {/* ============================= */}
 
             <h4 className="text-yellow-500 pt-4">
               Additional Notes
             </h4>
 
             <textarea
-              rows={5}
+              rows="5"
               placeholder="Questions, special requests, or appointment scheduling details"
               className="input-style"
               value={formData.notes}
@@ -708,7 +819,9 @@ export default function Consultation() {
               }
             />
 
+            {/* ============================= */}
             {/* CONSENT */}
+            {/* ============================= */}
 
             <label className="flex gap-3 text-sm text-gray-400">
 
@@ -718,12 +831,15 @@ export default function Consultation() {
               />
 
               <span>
-                I agree to be contacted regarding my inquiry.
+                I agree to be contacted regarding
+                my inquiry.
               </span>
 
             </label>
 
+            {/* ============================= */}
             {/* SUBMIT */}
+            {/* ============================= */}
 
             <button
               type="submit"
