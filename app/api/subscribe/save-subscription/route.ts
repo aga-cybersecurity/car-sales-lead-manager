@@ -14,7 +14,10 @@ export async function POST(request: Request) {
       !subscription.keys?.auth
     ) {
       return NextResponse.json(
-        { error: "Invalid push subscription." },
+        {
+          success: false,
+          error: "Invalid push subscription.",
+        },
         { status: 400 }
       );
     }
@@ -24,8 +27,7 @@ export async function POST(request: Request) {
       .upsert(
         {
           endpoint: subscription.endpoint,
-          p256dh: subscription.keys.p256dh,
-          auth: subscription.keys.auth,
+          subscription: subscription,
         },
         {
           onConflict: "endpoint",
@@ -33,33 +35,32 @@ export async function POST(request: Request) {
       );
 
     if (error) {
-      console.error(
-        "SUPABASE SUBSCRIPTION ERROR:",
-        error
-      );
+      console.error("SUPABASE SUBSCRIPTION ERROR:", error);
 
       return NextResponse.json(
-        { error: error.message },
+        {
+          success: false,
+          error: error.message,
+        },
         { status: 500 }
       );
     }
 
-    console.log(
-      "PUSH SUBSCRIPTION SAVED SUCCESSFULLY"
-    );
-
-    return NextResponse.json({
-      success: true,
-      message: "Subscription saved successfully.",
-    });
-  } catch (error) {
-    console.error(
-      "SAVE SUBSCRIPTION ERROR:",
-      error
-    );
+    console.log("PUSH SUBSCRIPTION SAVED SUCCESSFULLY");
 
     return NextResponse.json(
       {
+        success: true,
+        message: "Subscription saved successfully.",
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("SAVE SUBSCRIPTION ERROR:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
         error:
           error instanceof Error
             ? error.message
