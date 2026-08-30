@@ -21,12 +21,16 @@ export async function POST(request: Request) {
 
     const { error } = await supabase
       .from("push_subscriptions")
-      .insert({
-        subscription: JSON.stringify(subscription),
-        endpoint: subscription.endpoint,
-        p256dh: subscription.keys.p256dh,
-        auth: subscription.keys.auth,
-      });
+      .upsert(
+        {
+          endpoint: subscription.endpoint,
+          p256dh: subscription.keys.p256dh,
+          auth: subscription.keys.auth,
+        },
+        {
+          onConflict: "endpoint",
+        }
+      );
 
     if (error) {
       console.error(
@@ -39,6 +43,10 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    console.log(
+      "PUSH SUBSCRIPTION SAVED SUCCESSFULLY"
+    );
 
     return NextResponse.json({
       success: true,
