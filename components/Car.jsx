@@ -15,7 +15,7 @@ export default function Car() {
   const carRef = useRef();
 
 
-  useFrame(() => {
+  useFrame(() => {s
 
     if (carRef.current) {
 

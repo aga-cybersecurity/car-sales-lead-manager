@@ -10,6 +10,7 @@ import LeadDrawer from "./components/LeadDrawer";
 import AddLeadDrawer from "./components/AddLeadDrawer";
 import UpcomingAppointments from "./components/UpcomingAppointments";
 import LeadPipeline from "./components/LeadPipeline";
+import NotificationSetup from "@/components/NotificationSetup";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -31,9 +32,6 @@ export default function Dashboard() {
     checkAuthentication();
   }, []);
 
-  /*
-   * AUTHENTICATION CHECK
-   */
   async function checkAuthentication() {
     const {
       data: { user },
@@ -49,9 +47,6 @@ export default function Dashboard() {
     await fetchLeads();
   }
 
-  /*
-   * LOAD ACTIVE + DELETED LEADS
-   */
   async function fetchLeads() {
     const { data, error } = await supabase
       .from("Leads")
@@ -65,20 +60,15 @@ export default function Dashboard() {
 
     const allLeads = data || [];
 
-    // Active leads
     setLeads(
       allLeads.filter((lead) => !lead.deleted_at)
     );
 
-    // Deleted leads
     setDeletedLeads(
       allLeads.filter((lead) => lead.deleted_at)
     );
   }
 
-  /*
-   * UPDATE STATUS
-   */
   async function updateStatus(id, newStatus) {
     const { error } = await supabase
       .from("Leads")
@@ -104,9 +94,6 @@ export default function Dashboard() {
     );
   }
 
-  /*
-   * SOFT DELETE LEAD
-   */
   async function deleteLead(id) {
     if (!id) {
       console.error("DELETE ERROR: No lead ID provided.");
@@ -157,9 +144,6 @@ export default function Dashboard() {
     await fetchLeads();
   }
 
-  /*
-   * RESTORE LEAD
-   */
   async function restoreLead(id) {
     if (!id) {
       console.error("RESTORE ERROR: No lead ID provided.");
@@ -206,9 +190,6 @@ export default function Dashboard() {
     await fetchLeads();
   }
 
-  /*
-   * LOGOUT
-   */
   async function handleLogout() {
     if (loggingOut) return;
 
@@ -226,9 +207,6 @@ export default function Dashboard() {
     router.refresh();
   }
 
-  /*
-   * FILTER ACTIVE LEADS
-   */
   const filteredLeads = leads.filter((lead) => {
     const searchText = `
       ${lead.first_name || ""}
@@ -261,36 +239,26 @@ export default function Dashboard() {
     );
   });
 
-  /*
-   * AUTHENTICATION LOADING
-   */
   if (checkingAuth) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-black text-white">
         <div className="text-center">
-
           <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-yellow-500" />
 
           <p className="text-sm text-gray-400">
             Checking authentication...
           </p>
-
         </div>
       </main>
     );
   }
 
-  /*
-   * DASHBOARD
-   */
   return (
     <main className="min-h-screen bg-black p-10 text-white">
-
       <div className="mx-auto max-w-7xl">
 
         {/* HEADER */}
         <div className="mb-10 flex items-start justify-between gap-6">
-
           <div>
             <h1 className="text-4xl font-bold">
               Dunia Lead Dashboard
@@ -303,8 +271,6 @@ export default function Dashboard() {
 
           <div className="flex items-center gap-3">
 
-            {/* ADD NEW LEAD */}
-
             <button
               type="button"
               onClick={() => setShowAddLead(true)}
@@ -312,8 +278,6 @@ export default function Dashboard() {
             >
               + Add New Lead
             </button>
-
-            {/* SIGN OUT */}
 
             <button
               type="button"
@@ -327,12 +291,14 @@ export default function Dashboard() {
             </button>
 
           </div>
-
         </div>
 
+        {/* NOTIFICATIONS */}
+        <section className="mb-10">
+          <NotificationSetup />
+        </section>
 
         {/* UPCOMING APPOINTMENTS */}
-
         <section>
           <UpcomingAppointments
             leads={leads}
@@ -340,16 +306,12 @@ export default function Dashboard() {
           />
         </section>
 
-
         {/* STATS */}
-
         <section className="mt-10">
           <StatsCards leads={leads} />
         </section>
 
-
         {/* PIPELINE */}
-
         <section className="mt-10">
           <LeadPipeline
             leads={filteredLeads}
@@ -358,11 +320,8 @@ export default function Dashboard() {
           />
         </section>
 
-
         {/* SEARCH AND FILTERS */}
-
         <section className="mt-10">
-
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
 
             <h2 className="mb-4 text-xl font-semibold">
@@ -388,7 +347,6 @@ export default function Dashboard() {
                 }
                 className="rounded-lg border border-zinc-700 bg-zinc-800 p-3 text-white outline-none"
               >
-
                 <option value="All">
                   All
                 </option>
@@ -416,9 +374,7 @@ export default function Dashboard() {
                 <option value="Lost">
                   Lost
                 </option>
-
               </select>
-
 
               <select
                 value={appointmentFilter}
@@ -427,7 +383,6 @@ export default function Dashboard() {
                 }
                 className="rounded-lg border border-zinc-700 bg-zinc-800 p-3 text-white outline-none"
               >
-
                 <option value="All">
                   All Appointments
                 </option>
@@ -439,20 +394,14 @@ export default function Dashboard() {
                 <option value="None">
                   No Appointment
                 </option>
-
               </select>
 
             </div>
-
           </div>
-
         </section>
 
-
         {/* CLIENT LEADS */}
-
         <section className="mt-10">
-
           <LeadsTable
             leads={filteredLeads}
             deletedLeads={deletedLeads}
@@ -461,12 +410,9 @@ export default function Dashboard() {
             deleteLead={deleteLead}
             restoreLead={restoreLead}
           />
-
         </section>
 
-
         {/* LEAD DRAWER */}
-
         <LeadDrawer
           lead={selectedLead}
           closeDrawer={() =>
@@ -476,9 +422,7 @@ export default function Dashboard() {
           refreshLeads={fetchLeads}
         />
 
-
         {/* ADD NEW LEAD DRAWER */}
-
         {showAddLead && (
           <AddLeadDrawer
             closeDrawer={() =>
@@ -490,13 +434,10 @@ export default function Dashboard() {
 
       </div>
 
-
       {/* FOOTER */}
-
       <footer className="mt-16 border-t border-zinc-800 pt-6 text-center text-sm text-gray-500">
         © 2026 Dunia Arkoub · Designed by AGA CyberWorks
       </footer>
-
     </main>
   );
 }
