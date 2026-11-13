@@ -5,7 +5,6 @@ import { createClient } from "@supabase/supabase-js";
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  
   try {
     const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
     const privateKey = process.env.VAPID_PRIVATE_KEY;
@@ -23,6 +22,7 @@ export async function POST(request: Request) {
     ) {
       return NextResponse.json(
         {
+          success: false,
           error: "Notification environment variables are missing.",
         },
         { status: 500 }
@@ -46,13 +46,21 @@ export async function POST(request: Request) {
 
     const supabaseAdmin = createClient(
       supabaseUrl,
-      serviceRoleKey
+      serviceRoleKey,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
     );
 
-    const { data: subscriptions, error } =
-      await supabaseAdmin
-        .from("push_subscriptions")
-        .select("*");
+    const {
+      data: subscriptions,
+      error,
+    } = await supabaseAdmin
+      .from("push_subscriptions")
+      .select("*");
 
     if (error) {
       console.error(
@@ -62,8 +70,8 @@ export async function POST(request: Request) {
 
       return NextResponse.json(
         {
-          error:
-            "Could not retrieve push subscriptions.",
+          success: false,
+          error: "Could not retrieve push subscriptions.",
         },
         { status: 500 }
       );
@@ -72,14 +80,32 @@ export async function POST(request: Request) {
     if (!subscriptions || subscriptions.length === 0) {
       return NextResponse.json({
         success: true,
-        message:
-          "No notification subscriptions found.",
+        message: "No notification subscriptions found.",
+        results: [],
       });
     }
 
     const results = [];
 
     for (const savedSubscription of subscriptions) {
+      if (
+        !savedSubscription.endpoint ||
+        !savedSubscription.p256dh ||
+        !savedSubscription.auth
+      ) {
+        console.warn(
+          "SKIPPING INVALID PUSH SUBSCRIPTION:",
+          savedSubscription.id
+        );
+
+        results.push({
+          success: false,
+          reason: "Missing subscription keys",
+        });
+
+        continue;
+      }
+
       const subscription = {
         endpoint: savedSubscription.endpoint,
         keys: {
@@ -99,7 +125,6 @@ export async function POST(request: Request) {
         );
 
         results.push({
-          endpoint: savedSubscription.endpoint,
           success: true,
         });
       } catch (error) {
@@ -109,8 +134,11 @@ export async function POST(request: Request) {
         );
 
         results.push({
-          endpoint: savedSubscription.endpoint,
           success: false,
+          reason:
+            error instanceof Error
+              ? error.message
+              : "Notification delivery failed",
         });
       }
     }
@@ -127,6 +155,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
+        success: false,
         error:
           error instanceof Error
             ? error.message

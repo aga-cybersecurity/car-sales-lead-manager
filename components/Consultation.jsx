@@ -186,14 +186,29 @@ export default function Consultation() {
     // SAVE LEAD TO SUPABASE
     // -----------------------------
 
-    const {
-      data: savedLead,
-      error: leadError,
-    } = await supabase
-      .from("Leads")
-      .insert([leadData])
-      .select()
-      .single();
+    const response = await fetch("/api/consultation", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(leadData),
+});
+
+const result = await response.json();
+
+console.log("LEAD API RESPONSE:", result);
+
+if (!response.ok || !result.success) {
+  console.error("SUPABASE LEAD ERROR:", result);
+
+  alert(
+    "There was a problem submitting your consultation. Please try again."
+  );
+
+  return;
+}
+
+console.log("LEAD SUCCESSFULLY SAVED");
 
     console.log(
       "LEAD INSERT FINISHED:",
