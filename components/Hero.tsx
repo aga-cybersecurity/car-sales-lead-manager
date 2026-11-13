@@ -196,7 +196,7 @@ export default function Hero() {
             className="mt-9 flex flex-wrap justify-center gap-4"
           >
             <a
-              href="#consultation"
+              href="/consultation"
               className="rounded-full bg-yellow-600 px-8 py-4 font-semibold text-black transition hover:bg-yellow-500"
             >
               Schedule Consultation
