@@ -10,7 +10,6 @@ import LeadDrawer from "./components/LeadDrawer";
 import AddLeadDrawer from "./components/AddLeadDrawer";
 import UpcomingAppointments from "./components/UpcomingAppointments";
 import LeadPipeline from "./components/LeadPipeline";
-import NotificationSetup from "@/components/NotificationSetup";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -293,10 +292,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* NOTIFICATIONS */}
-        <section className="mb-10">
-          <NotificationSetup />
-        </section>
+      
 
         {/* UPCOMING APPOINTMENTS */}
         <section>
