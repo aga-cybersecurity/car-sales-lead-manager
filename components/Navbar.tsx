@@ -1,24 +1,20 @@
 export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 w-full z-50 bg-black/40 backdrop-blur-md text-white px-8 py-5 flex justify-between items-center">
-
-    <h2>
-
+      <h2>
         <span className="ml-2 text-sm font-normal text-gray-400">
           Land Rover Novi
         </span>
       </h2>
 
       <div className="hidden md:flex gap-8 text-sm">
-        <a href="#home" className="hover:text-yellow-500 transition">
+        <a href="/#home" className="hover:text-yellow-500 transition">
           Home
         </a>
-
-        <a href="#about" className="hover:text-yellow-500 transition">
+        <a href="/#about" className="hover:text-yellow-500 transition">
           About
         </a>
-
-        <a href="#contact" className="hover:text-yellow-500 transition">
+        <a href="/#contact" className="hover:text-yellow-500 transition">
           Contact
         </a>
       </div>
@@ -31,7 +27,6 @@ export default function Navbar() {
       >
         Browse Cars
       </a>
-
     </nav>
   );
 }
